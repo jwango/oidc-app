@@ -22,7 +22,9 @@ const sess = session({
     cookie: { maxAge: maxAgeMs, secure: false, httpOnly: true },
     store: new MemoryStore({ 
         checkPeriod: checkPeriodMs
-    })
+    }),
+    resave: false,
+    saveUninitialized: true
 });
 
 if (app.get('env') === 'production') {
@@ -36,9 +38,41 @@ app.use(cors(corsOptions));
 
 // Proxy setup
 app.get('/login', async (req, res, next) => {
-    await AuthClient.authenticateUser();
-    req.session.authenticated = true;
-    res.json(AuthClient.openIdConfig);
+  console.log(req.session.id);
+  req.session.pendingAuth = true;
+    const accessTokenUrl = await AuthClient.getAccessTokenUrl();
+    res.status(302);
+    res.header("Location", accessTokenUrl);
+    res.end();
+});
+
+app.get('/auth_handler', async (req, res, next) => {
+  console.log(req.headers);
+  const tokenResponse = await AuthClient.exchangeCodeForToken(req.query.code);
+  req.session.tokenState = await tokenResponse.json();
+  res.status(302);
+  res.header("Location", "http://localhost:3000");
+  req.session.save((err) => {
+    console.log(req.session);
+    console.log(req.session.id);
+    console.log("saved session for" + req.sessionID);
+    res.end();
+  });
+});
+
+app.get('/userinfo', async (req, res, next) => {
+  console.log(req.headers);
+  console.log(req.get('origin'));
+  console.log(req.session.id);
+  if (req.session.tokenState && req.session.tokenState.access_token) {
+    const response = await AuthClient.getUserInfo(req.session.tokenState.access_token);
+    res.status(response.status);
+    res.json(await response.json());
+  } else {
+    res.status(302);
+    res.header("Location", "http://localhost:8080/login");
+    res.end();
+  }
 });
  
 // Access the session as req.session

@@ -6,13 +6,18 @@ import { useState } from 'react';
 export default function Home() {
 
   const [state, setState] = useState({
-    config: {}
+    userInfo: {}
   });
 
   function login() {
-    fetch("http://localhost:8080/login")
-      .then((res) => res.json())
-      .then((body) => setState({ config: body }));
+    //window.location.replace("http://localhost:8080/login");
+    fetch("http://localhost:8080/login");
+  }
+
+  function getUserInfo() {
+    fetch("http://localhost:8080/userinfo")
+      .then(res => res.json())
+      .then(body => setState({ userInfo: body}));
   }
 
   return (
@@ -26,9 +31,10 @@ export default function Home() {
         <h1 className={styles.title}>
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
-        <h2>Config</h2>
-        <pre>{JSON.stringify(state.config, null, 2)}</pre>
+        <h2>User Info</h2>
+        <pre>{JSON.stringify(state.userInfo, null, 2)}</pre>
         <button onClick={login}>Login!</button>
+        <button onClick={getUserInfo}>User Info</button>
       </main>
 
       <footer className={styles.footer}>

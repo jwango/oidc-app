@@ -11,7 +11,16 @@ const defaultErrorHandler = function(response) {
     throw err;
 }
 
+const buildUrlWithParams = function(url, params) {
+    const paramsMapped = Object.keys(params || {}).map(paramKey => paramKey+"="+encodeURIComponent(params[paramKey]));
+    if (paramsMapped.length > 0) {
+        return url + "?" + paramsMapped.join("&");
+    }
+    return url;
+}
+
 module.exports = {
     parseJson,
-    defaultErrorHandler
+    defaultErrorHandler,
+    buildUrlWithParams
 }
