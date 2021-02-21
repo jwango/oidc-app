@@ -1,10 +1,20 @@
 const express = require('express');
+const cors = require('cors');
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
+const proxy = require('express-http-proxy');
+require('isomorphic-fetch');
+
+const AuthClient = require('./auth')();
 
 const app = express();
 const maxAgeMs = 1000 * 60;
 const checkPeriodMs = 1000 * 60 * 60;
+
+const corsOptions = {
+  origin: 'http://localhost:3000',
+  optionsSuccessStatus: 200
+};
 
 // Use the session middleware
 const sess = session({
@@ -20,6 +30,16 @@ if (app.get('env') === 'production') {
     sess.cookie.secure = true // serve secure cookies
 }
 app.use(sess);
+
+
+app.use(cors(corsOptions));
+
+// Proxy setup
+app.get('/login', async (req, res, next) => {
+    await AuthClient.authenticateUser();
+    req.session.authenticated = true;
+    res.json(AuthClient.openIdConfig);
+});
  
 // Access the session as req.session
 app.get('/', function(req, res, next) {
