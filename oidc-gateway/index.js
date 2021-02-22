@@ -3,6 +3,7 @@ const cors = require('cors');
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
 const proxy = require('express-http-proxy');
+const uidSafe = require('uid-safe');
 require('isomorphic-fetch');
 
 const AuthClient = require('./auth')();
@@ -13,16 +14,18 @@ const checkPeriodMs = 1000 * 60 * 60;
 
 const corsOptions = {
   origin: 'http://localhost:3000',
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  credentials: true
 };
 
 // Use the session middleware
+const store = new MemoryStore({ 
+  checkPeriod: checkPeriodMs
+});
 const sess = session({
     secret: 'keyboard cat',
-    cookie: { maxAge: maxAgeMs, secure: false, httpOnly: true },
-    store: new MemoryStore({ 
-        checkPeriod: checkPeriodMs
-    }),
+    cookie: { maxAge: maxAgeMs, secure: false, httpOnly: true, sameSite: 'lax', path: '/' },
+    store,
     resave: false,
     saveUninitialized: true
 });
@@ -37,46 +40,58 @@ app.use(sess);
 app.use(cors(corsOptions));
 
 // Proxy setup
-app.get('/login', async (req, res, next) => {
+app.get('/prelogin', async (req, res, next) => {
+  console.log(req.session);
   console.log(req.session.id);
-  req.session.pendingAuth = true;
-    const accessTokenUrl = await AuthClient.getAccessTokenUrl();
-    res.status(302);
-    res.header("Location", accessTokenUrl);
-    res.end();
+  req.session.loginCorrelation = await uidSafe(30);
+  res.status(200);
+  res.end(req.session.loginCorrelation);
+});
+
+app.get('/login', async (req, res, next) => {
+  store.all(async (err, sessionsMap) => {
+    const matchingSession = Object.keys(sessionsMap).find(key => sessionsMap[key].loginCorrelation == req.query.correlationId);
+    req.session.originalSessionID = matchingSession;
+    const accessTokenUrl = await AuthClient.getAccessTokenUrl(req.query.correlationId);
+    req.session.save((err) => {
+      console.log("saved session for " + req.session.id);
+      res.redirect(302, accessTokenUrl);
+    });
+  });
 });
 
 app.get('/auth_handler', async (req, res, next) => {
-  console.log(req.headers);
   const tokenResponse = await AuthClient.exchangeCodeForToken(req.query.code);
-  req.session.tokenState = await tokenResponse.json();
-  res.status(302);
-  res.header("Location", "http://localhost:3000");
-  req.session.save((err) => {
-    console.log(req.session);
-    console.log(req.session.id);
-    console.log("saved session for" + req.sessionID);
-    res.end();
+  const tokenState = await tokenResponse.json();
+  console.log(req.session.originalSessionID);
+  store.get(req.session.originalSessionID, (err, s) => {
+    console.log("gotten");
+    store.set(req.session.originalSessionID, {
+      ...s,
+      tokenState
+    }, () => {
+      console.log("set");
+      res.redirect(302, "http://localhost:3000");
+    });
   });
 });
 
 app.get('/userinfo', async (req, res, next) => {
-  console.log(req.headers);
-  console.log(req.get('origin'));
+  console.log(req.session);
   console.log(req.session.id);
   if (req.session.tokenState && req.session.tokenState.access_token) {
     const response = await AuthClient.getUserInfo(req.session.tokenState.access_token);
     res.status(response.status);
     res.json(await response.json());
   } else {
-    res.status(302);
-    res.header("Location", "http://localhost:8080/login");
-    res.end();
+    res.status(200);
+    res.json({});
   }
 });
  
 // Access the session as req.session
 app.get('/', function(req, res, next) {
+  console.log(req.session.id);
   if (req.session.views) {
     req.session.views++;
     res.setHeader('Content-Type', 'text/html');

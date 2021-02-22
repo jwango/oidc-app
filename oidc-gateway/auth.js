@@ -4,7 +4,7 @@ const FormData = require('form-data');
 const AuthClient = function() {
     const WELL_KNOWN_URI = "https://accounts.google.com/.well-known/openid-configuration";
     const REDIRECT_URI = "http://localhost:8080/auth_handler";
-    const CLIENT_ID = "1057821592187-doj5ba427hi5vl5s8q7ob6h7dh1p45np.apps.googleusercontent.com";
+    const CLIENT_ID = process.env.CLIENT_ID;
     const CLIENT_SECRET = process.env.CLIENT_SECRET;
 
     async function resolveConfig() {
@@ -18,14 +18,14 @@ const AuthClient = function() {
         }
     }
 
-    async function getAccessTokenUrl() {
+    async function getAccessTokenUrl(state) {
         const config = await this.resolveConfig();
         const params = {
             response_type: "code",
             client_id: CLIENT_ID,
             redirect_uri: REDIRECT_URI,
             scope: "openid profile",
-            state: "state",
+            state,
             nonce: "nonce",
         };
         return HttpUtils.buildUrlWithParams(config.authorization_endpoint, params);
@@ -57,6 +57,7 @@ const AuthClient = function() {
         resolveConfig,
         getAccessTokenUrl,
         exchangeCodeForToken,
+        getUserInfo,
         openIdConfig: OpenIdConfig(null)
     };
 }

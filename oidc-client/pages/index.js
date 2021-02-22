@@ -10,12 +10,16 @@ export default function Home() {
   });
 
   function login() {
-    //window.location.replace("http://localhost:8080/login");
-    fetch("http://localhost:8080/login");
+    fetch("http://localhost:8080/prelogin", { credentials: 'include' })
+      .then(res => res.text())
+      .then(correlationId => {
+        console.log(correlationId);
+        window.location.replace("http://localhost:8080/login?correlationId=" + correlationId);
+      });
   }
 
   function getUserInfo() {
-    fetch("http://localhost:8080/userinfo")
+    fetch("http://localhost:8080/userinfo", { credentials: 'include' })
       .then(res => res.json())
       .then(body => setState({ userInfo: body}));
   }
