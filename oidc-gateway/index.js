@@ -41,8 +41,6 @@ app.use(cors(corsOptions));
 
 // Proxy setup
 app.get('/prelogin', async (req, res, next) => {
-  console.log(req.session);
-  console.log(req.session.id);
   req.session.loginCorrelation = await uidSafe(30);
   res.status(200);
   res.end(req.session.loginCorrelation);
@@ -50,60 +48,66 @@ app.get('/prelogin', async (req, res, next) => {
 
 app.get('/login', async (req, res, next) => {
   store.all(async (err, sessionsMap) => {
+    const nonce = await uidSafe(30);
     const matchingSession = Object.keys(sessionsMap).find(key => sessionsMap[key].loginCorrelation == req.query.correlationId);
     req.session.originalSessionID = matchingSession;
-    const accessTokenUrl = await AuthClient.getAccessTokenUrl(req.query.correlationId);
+    req.session.nonce = nonce;
+    req.session.state = req.query.correlationId;
+    const accessTokenUrl = await AuthClient.getAccessTokenUrl(req.query.correlationId, nonce);
     req.session.save((err) => {
-      console.log("saved session for " + req.session.id);
       res.redirect(302, accessTokenUrl);
     });
   });
 });
 
 app.get('/auth_handler', async (req, res, next) => {
+  if (req.query.state != req.session.state) {
+    res.status(400);
+    res.end("Invalid redirect. Did not match original auth request.");
+  }
   const tokenResponse = await AuthClient.exchangeCodeForToken(req.query.code);
-  const tokenState = await tokenResponse.json();
-  console.log(req.session.originalSessionID);
-  store.get(req.session.originalSessionID, (err, s) => {
-    console.log("gotten");
-    store.set(req.session.originalSessionID, {
-      ...s,
-      tokenState
-    }, () => {
-      console.log("set");
-      res.redirect(302, "http://localhost:3000");
+  const tokenState = AuthClient.TokenState(await tokenResponse.json());
+  try {
+    // clear the nonce to prevent replay attack
+    const nonceToCheck = req.session.nonce + "";
+    req.session.nonce = undefined;
+    const savePromise = new Promise((resolve, reject) => {
+      req.session.save(err => err ? reject(err) : resolve());
     });
-  });
+    await savePromise;
+
+    // verify the token
+    const decoded = await AuthClient.verifyToken(tokenState.id_token, nonceToCheck);
+
+    // correlate the token back to the original session (prelogin)
+    store.get(req.session.originalSessionID, (err, s) => {
+      if (err) { throw new Error(err); }
+      store.set(req.session.originalSessionID, {
+        ...s,
+        tokenState
+      }, (err) => {
+        if (err) { throw new Error(err); }
+        res.redirect(302, "http://localhost:3000");
+      });
+    });
+  } catch (err) {
+    res.status(400);
+    console.log(err);
+    res.end("Could not verify the token's identity.");
+  }
 });
 
 app.get('/userinfo', async (req, res, next) => {
-  console.log(req.session);
-  console.log(req.session.id);
   if (req.session.tokenState && req.session.tokenState.access_token) {
     const response = await AuthClient.getUserInfo(req.session.tokenState.access_token);
     res.status(response.status);
     res.json(await response.json());
   } else {
-    res.status(200);
-    res.json({});
-  }
-});
- 
-// Access the session as req.session
-app.get('/', function(req, res, next) {
-  console.log(req.session.id);
-  if (req.session.views) {
-    req.session.views++;
-    res.setHeader('Content-Type', 'text/html');
-    res.write('<p>views: ' + req.session.views + '</p>');
-    res.write('<p>expires in: ' + (req.session.cookie.maxAge / 1000) + 's</p>');
-    res.end();
-  } else {
-    req.session.views = 1;
-    res.end('welcome to the session demo. refresh!');
+    res.status(401);
+    res.end('Unauthorized');
   }
 });
 
 app.listen(8080, () => {
-    console.log(`Example app listening at http://localhost:${8080}`)
+    console.log(`Gateway listening at http://localhost:${8080}`)
 })

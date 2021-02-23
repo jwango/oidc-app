@@ -15,6 +15,8 @@
     "express-session": "^1.17.1",
     "form-data": "^4.0.0",
     "isomorphic-fetch": "^3.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "jwks-rsa": "^1.12.2",
     "memorystore": "^1.6.4"
   }
 }

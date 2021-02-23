@@ -1,5 +1,7 @@
 const HttpUtils = require('./http');
 const FormData = require('form-data');
+const jwt = require('jsonwebtoken');
+const jwksClient = require('jwks-rsa');
 
 const AuthClient = function() {
     const WELL_KNOWN_URI = "https://accounts.google.com/.well-known/openid-configuration";
@@ -18,7 +20,20 @@ const AuthClient = function() {
         }
     }
 
-    async function getAccessTokenUrl(state) {
+    async function resolveJwksClient() {
+        if (this.jwksClient != null) {
+            return this.jwksClient;
+        } else {
+            const config = await this.resolveConfig();
+            this.jwksClient = jwksClient({
+                strictSsl: true,
+                jwksUri: config.jwks_uri
+            });
+            return this.jwksClient;
+        }
+    }
+
+    async function getAccessTokenUrl(state, nonce) {
         const config = await this.resolveConfig();
         const params = {
             response_type: "code",
@@ -26,7 +41,7 @@ const AuthClient = function() {
             redirect_uri: REDIRECT_URI,
             scope: "openid profile",
             state,
-            nonce: "nonce",
+            nonce,
         };
         return HttpUtils.buildUrlWithParams(config.authorization_endpoint, params);
     }
@@ -53,12 +68,54 @@ const AuthClient = function() {
         return fetch(config.userinfo_endpoint, { headers });
     }
 
+    async function verifyToken(idToken, nonce = undefined) {
+        const config = await this.resolveConfig();
+        const client = await this.resolveJwksClient();
+
+        const getKey = (header, callback) => {
+            client.getSigningKey(header.kid, function(err, key) {
+                if (err) { callback(err); }
+                else {
+                    var signingKey = key.getPublicKey() || key.rsaPublicKey;
+                    callback(null, signingKey);
+                }
+            });
+        }
+
+        return new Promise((resolve, reject) => {
+            jwt.verify(idToken, getKey, {
+                algorithms: config.id_token_signing_alg_values_supported,
+                audience: CLIENT_ID,
+                issuer: config.issuer,
+                nonce
+            }, (err, decoded) => {
+                if (err) { reject(err); }
+                else { resolve(decoded); }
+            });
+        });
+    }
+
+    function TokenState(rawTokenState) {
+        return {
+            access_token: rawTokenState.access_token,
+            expires_in: rawTokenState.expires_in,
+            id_token: rawTokenState.id_token,
+            scope: rawTokenState.scope,
+            token_type: rawTokenState.token_type,
+            refresh_token: rawTokenState.refresh_token
+        };
+    }
+
     return {
+        TokenState,
         resolveConfig,
+        resolveJwksClient,
         getAccessTokenUrl,
         exchangeCodeForToken,
+        verifyToken,
         getUserInfo,
-        openIdConfig: OpenIdConfig(null)
+        openIdConfig: OpenIdConfig(null),
+        jwksClient: null
     };
 }
 
@@ -77,7 +134,8 @@ const OpenIdConfig = function(rawConfig) {
         id_token_signing_alg_values_supported: rawConfig.id_token_signing_alg_values_supported,
         scopes_supported: rawConfig.scopes_supported,
         claims_supported: rawConfig.claims_supported,
-        grant_types_supported: rawConfig.grant_types_supported
+        grant_types_supported: rawConfig.grant_types_supported,
+        jwks_uri: rawConfig.jwks_uri
     }
 }
 
