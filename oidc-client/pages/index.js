@@ -10,12 +10,8 @@ export default function Home() {
   });
 
   function login() {
-    fetch("http://localhost:8080/prelogin", { credentials: 'include' })
-      .then(res => res.text())
-      .then(correlationId => {
-        console.log(correlationId);
-        window.location.replace("http://localhost:8080/login?correlationId=" + correlationId);
-      });
+    const userState = encodeURIComponent(window.location.href + "?chuckTesta");
+    window.location.replace(`http://localhost:8080/login?state=${userState}`);
   }
 
   function getUserInfo() {

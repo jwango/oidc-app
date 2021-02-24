@@ -36,27 +36,23 @@ if (app.get('env') === 'production') {
 }
 app.use(sess);
 
+app.use((req, res, next) => {
+  console.log(`${req.path}: ${req.session.id}`);
+  next();
+});
+
 
 app.use(cors(corsOptions));
 
 // Proxy setup
-app.get('/prelogin', async (req, res, next) => {
-  req.session.loginCorrelation = await uidSafe(30);
-  res.status(200);
-  res.end(req.session.loginCorrelation);
-});
-
 app.get('/login', async (req, res, next) => {
-  store.all(async (err, sessionsMap) => {
-    const nonce = await uidSafe(30);
-    const matchingSession = Object.keys(sessionsMap).find(key => sessionsMap[key].loginCorrelation == req.query.correlationId);
-    req.session.originalSessionID = matchingSession;
-    req.session.nonce = nonce;
-    req.session.state = req.query.correlationId;
-    const accessTokenUrl = await AuthClient.getAccessTokenUrl(req.query.correlationId, nonce);
-    req.session.save((err) => {
-      res.redirect(302, accessTokenUrl);
-    });
+  req.session.loginCorrelation = await uidSafe(30);
+  req.session.nonce = await uidSafe(30);
+  req.session.state = req.session.loginCorrelation + "." + req.query.state;
+  const accessTokenUrl = await AuthClient.getAccessTokenUrl(req.session.state, req.session.nonce);
+  req.session.save((err) => {
+    if (err) { next(err); }
+    else { res.redirect(302, accessTokenUrl); }
   });
 });
 
@@ -76,20 +72,17 @@ app.get('/auth_handler', async (req, res, next) => {
     });
     await savePromise;
 
-    // verify the token
+    // verify the token 
     const decoded = await AuthClient.verifyToken(tokenState.id_token, nonceToCheck);
 
-    // correlate the token back to the original session (prelogin)
-    store.get(req.session.originalSessionID, (err, s) => {
-      if (err) { throw new Error(err); }
-      store.set(req.session.originalSessionID, {
-        ...s,
-        tokenState
-      }, (err) => {
-        if (err) { throw new Error(err); }
-        res.redirect(302, "http://localhost:3000");
-      });
-    });
+    // correlate the token to the user session
+    const originalState = req.session.state.split(".", 2)[1];
+    const redirectUrl = originalState || "http://localhost:3000";
+    req.session.tokenState = tokenState;
+    req.session.save(err => {
+      if (err) { next(err); }
+      else { res.redirect(302, redirectUrl); }
+    })
   } catch (err) {
     res.status(400);
     console.log(err);
