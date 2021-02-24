@@ -11,12 +11,24 @@ const AuthClient = require('./auth')();
 const app = express();
 const maxAgeMs = 1000 * 60;
 const checkPeriodMs = 1000 * 60 * 60;
+const APP_URL = process.env.APP_URL || "http://localhost:3000"
 
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: APP_URL,
   optionsSuccessStatus: 200,
   credentials: true
 };
+
+const CSRF_MIDDLEWARE = (req, res, next) => {
+  console.log("check for CSRF");
+  console.log(req.headers);
+  next();
+};
+
+const LOG_MIDDLEWARE = (req, res, next) => {
+  console.log(`${req.path}: ${req.session.id}`);
+  next();
+}
 
 // Use the session middleware
 const store = new MemoryStore({ 
@@ -34,26 +46,38 @@ if (app.get('env') === 'production') {
     app.set('trust proxy', 1) // trust first proxy
     sess.cookie.secure = true // serve secure cookies
 }
+
+// Pre-route middleware
 app.use(sess);
-
-app.use((req, res, next) => {
-  console.log(`${req.path}: ${req.session.id}`);
-  next();
-});
-
-
+app.use([CSRF_MIDDLEWARE, LOG_MIDDLEWARE]);
 app.use(cors(corsOptions));
 
 // Proxy setup
 app.get('/login', async (req, res, next) => {
-  req.session.loginCorrelation = await uidSafe(30);
-  req.session.nonce = await uidSafe(30);
-  req.session.state = req.session.loginCorrelation + "." + req.query.state;
-  const accessTokenUrl = await AuthClient.getAccessTokenUrl(req.session.state, req.session.nonce);
-  req.session.save((err) => {
-    if (err) { next(err); }
-    else { res.redirect(302, accessTokenUrl); }
-  });
+  let loggedIn = false;
+  if (req.session.tokenState) {
+    try {
+      await AuthClient.verifyToken(req.session.tokenState.id_token);
+      loggedIn = true;
+    } catch (err) {
+      const decoded = AuthClient.decodeToken(req.session.tokenState.id_token);
+      console.log(`Previous login session invalid for subject ${decoded.sub}`);
+      loggedIn = false;
+    }
+  }
+
+  if (!loggedIn) {
+    req.session.loginCorrelation = await uidSafe(30);
+    req.session.nonce = await uidSafe(30);
+    req.session.state = req.session.loginCorrelation + "." + req.query.state;
+    const accessTokenUrl = await AuthClient.getAccessTokenUrl(req.session.state, req.session.nonce);
+    req.session.save((err) => {
+      if (err) { next(err); }
+      else { res.redirect(302, accessTokenUrl); }
+    });
+  } else {
+    res.redirect(302, req.query.state || APP_URL);
+  }
 });
 
 app.get('/auth_handler', async (req, res, next) => {
@@ -77,7 +101,7 @@ app.get('/auth_handler', async (req, res, next) => {
 
     // correlate the token to the user session
     const originalState = req.session.state.split(".", 2)[1];
-    const redirectUrl = originalState || "http://localhost:3000";
+    const redirectUrl = originalState || APP_URL;
     req.session.tokenState = tokenState;
     req.session.save(err => {
       if (err) { next(err); }

@@ -95,6 +95,10 @@ const AuthClient = function() {
         });
     }
 
+    function decodeToken(idToken) {
+        return jwt.decode(idToken);
+    }
+
     function TokenState(rawTokenState) {
         return {
             access_token: rawTokenState.access_token,
@@ -113,6 +117,7 @@ const AuthClient = function() {
         getAccessTokenUrl,
         exchangeCodeForToken,
         verifyToken,
+        decodeToken,
         getUserInfo,
         openIdConfig: OpenIdConfig(null),
         jwksClient: null

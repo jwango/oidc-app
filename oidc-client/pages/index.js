@@ -10,7 +10,7 @@ export default function Home() {
   });
 
   function login() {
-    const userState = encodeURIComponent(window.location.href + "?chuckTesta");
+    const userState = encodeURIComponent(window.location.href);
     window.location.replace(`http://localhost:8080/login?state=${userState}`);
   }
 
