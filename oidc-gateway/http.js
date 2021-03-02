@@ -19,8 +19,29 @@ const buildUrlWithParams = function(url, params) {
     return url;
 }
 
+const urlTrailing = function(url) {
+    if (url && url.charAt(url.length - 1) != "/") {
+        return url + "/";
+    }
+    return url;
+}
+
+const urlStartsWith = function(url, compareWith) {
+    if (!url || !compareWith) { return false; }
+    const protocolSplit = urlTrailing(url).split("://", 2);
+    const routeSplit = protocolSplit[1].split("/");
+    return (urlExactlyMatches(protocolSplit[0] + "://" + routeSplit[0], compareWith));
+}
+
+const urlExactlyMatches = function(url, compareWith) {
+    return (urlTrailing(url) === urlTrailing(compareWith));
+}
+
 module.exports = {
     parseJson,
     defaultErrorHandler,
-    buildUrlWithParams
+    buildUrlWithParams,
+    urlTrailing,
+    urlStartsWith,
+    urlExactlyMatches
 }

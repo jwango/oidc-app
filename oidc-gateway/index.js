@@ -7,11 +7,17 @@ const uidSafe = require('uid-safe');
 require('isomorphic-fetch');
 
 const AuthClient = require('./auth')();
+const HttpUtils = require('./http');
 
 const app = express();
-const maxAgeMs = 1000 * 60;
-const checkPeriodMs = 1000 * 60 * 60;
-const APP_URL = process.env.APP_URL || "http://localhost:3000"
+const maxAgeMs = 1000 * 60 * 30; // 30 min
+const checkPeriodMs = 1000 * 60 * 60; // 60 min
+const PORT = process.env.PORT || 8080;
+const APP_URL = process.env.APP_URL || "http://localhost:3000";
+const HOST_URL = process.env.HOST_URL || `http://localhost:${PORT}`;
+const ALLOWED_ORIGINS = [APP_URL];
+const ALLOWED_REFERER_ORIGINS = [APP_URL, HOST_URL];
+const PROXY_URL = process.env.PROXY_URL || "localhost:8000";
 
 const corsOptions = {
   origin: APP_URL,
@@ -20,9 +26,25 @@ const corsOptions = {
 };
 
 const CSRF_MIDDLEWARE = (req, res, next) => {
-  console.log("check for CSRF");
-  console.log(req.headers);
-  next();
+  const origin = req.get("Origin");
+  const referer = req.get("Referer");
+  let failedCsrf = false;
+  if (origin) {
+    if (!ALLOWED_ORIGINS.some(allowedOrigin => HttpUtils.urlExactlyMatches(origin, allowedOrigin))) {
+      failedCsrf = true;
+      res.status(401);
+      res.send("Unauthorized");
+      console.log(`Origin ${origin} did not match allowed origins ${ALLOWED_ORIGINS}`);
+    }
+  } else if (referer) {
+    if (!ALLOWED_REFERER_ORIGINS.some(allowedReferer => HttpUtils.urlStartsWith(referer, allowedReferer))) {
+      failedCsrf = true;
+      res.status(401);
+      res.send("Unauthorized");
+      console.log(`Referer ${referer} did not match allowed origins ${ALLOWED_REFERER_ORIGINS}`);
+    }
+  }
+  if (!failedCsrf) { next(); }
 };
 
 const LOG_MIDDLEWARE = (req, res, next) => {
@@ -35,7 +57,7 @@ const store = new MemoryStore({
   checkPeriod: checkPeriodMs
 });
 const sess = session({
-    secret: 'keyboard cat',
+    secret: 'keyboard cat', // TODO: pull secret from environment
     cookie: { maxAge: maxAgeMs, secure: false, httpOnly: true, sameSite: 'lax', path: '/' },
     store,
     resave: false,
@@ -49,11 +71,11 @@ if (app.get('env') === 'production') {
 
 // Pre-route middleware
 app.use(sess);
-app.use([CSRF_MIDDLEWARE, LOG_MIDDLEWARE]);
+app.use(LOG_MIDDLEWARE);
 app.use(cors(corsOptions));
 
 // Proxy setup
-app.get('/login', async (req, res, next) => {
+app.get('/login', CSRF_MIDDLEWARE, async (req, res, next) => {
   let loggedIn = false;
   if (req.session.tokenState) {
     try {
@@ -83,7 +105,7 @@ app.get('/login', async (req, res, next) => {
 app.get('/auth_handler', async (req, res, next) => {
   if (req.query.state != req.session.state) {
     res.status(400);
-    res.end("Invalid redirect. Did not match original auth request.");
+    res.send("Invalid redirect. Did not match original auth request.");
   }
   const tokenResponse = await AuthClient.exchangeCodeForToken(req.query.code);
   const tokenState = AuthClient.TokenState(await tokenResponse.json());
@@ -96,7 +118,9 @@ app.get('/auth_handler', async (req, res, next) => {
     });
     await savePromise;
 
-    // verify the token 
+    // verify the token
+    console.log(tokenState.access_token);
+    console.log(tokenState.expires_in);
     const decoded = await AuthClient.verifyToken(tokenState.id_token, nonceToCheck);
 
     // correlate the token to the user session
@@ -110,21 +134,33 @@ app.get('/auth_handler', async (req, res, next) => {
   } catch (err) {
     res.status(400);
     console.log(err);
-    res.end("Could not verify the token's identity.");
+    res.send("Could not verify the token's identity.");
   }
 });
 
-app.get('/userinfo', async (req, res, next) => {
+app.get('/userinfo', CSRF_MIDDLEWARE, async (req, res, next) => {
   if (req.session.tokenState && req.session.tokenState.access_token) {
     const response = await AuthClient.getUserInfo(req.session.tokenState.access_token);
     res.status(response.status);
     res.json(await response.json());
   } else {
     res.status(401);
-    res.end('Unauthorized');
+    res.send('Unauthorized');
   }
 });
 
-app.listen(8080, () => {
-    console.log(`Gateway listening at http://localhost:${8080}`)
+app.use('/api', proxy(`${PROXY_URL}`, {
+  proxyReqPathResolver: function(req) {
+    return `/api${req.url}`;
+  },
+  proxyReqOptDecorator: function(proxyReqOpts, req) {
+    if (req.session.tokenState && req.session.tokenState.access_token) {
+      proxyReqOpts.headers['Authorization'] = `Bearer ${req.session.tokenState.access_token}`
+    }
+    return proxyReqOpts
+  }
+}));
+
+app.listen(PORT, () => {
+    console.log(`Gateway listening at http://localhost:${PORT}`);
 })
