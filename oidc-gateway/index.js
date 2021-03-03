@@ -7,6 +7,7 @@ const uidSafe = require('uid-safe');
 require('isomorphic-fetch');
 
 const app = express();
+const COOKIE_SECRET = process.env.COOKIE_SECRET || "secret";
 const maxAgeMs = process.env.COOKIE_MAX_AGE_MS || 1000 * 60 * 30; // 30 min
 const checkPeriodMs = process.env.COOKIE_CHECK_PERIOD_MS || 1000 * 60 * 60; // 60 min
 const PORT = process.env.PORT || 8080;
@@ -44,6 +45,8 @@ const CSRF_MIDDLEWARE = (req, res, next) => {
       res.send("Unauthorized");
       console.log(`Referer ${referer} did not match allowed origins ${ALLOWED_REFERER_ORIGINS}`);
     }
+  } else {
+    failedCsrf = true;
   }
   if (!failedCsrf) { next(); }
 };
@@ -62,7 +65,7 @@ const store = new MemoryStore({
 });
 
 const sessionOpts = {
-  secret: 'keyboard cat', // TODO: pull secret from environment
+  secret: COOKIE_SECRET,
   cookie: { maxAge: maxAgeMs, secure: false, httpOnly: true, sameSite: 'lax', path: '/' },
   store,
   resave: false,
