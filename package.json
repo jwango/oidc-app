@@ -1,0 +1,12 @@
+{
+    "name": "oidc-app",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+      "heroku-prebuild": "cd oidc-gateway && npm ci",
+      "start": "node oidc-gateway/index.js"
+    },
+    "author": "jwango",
+    "license": "ISC"
+  }
+  
