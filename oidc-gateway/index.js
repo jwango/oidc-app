@@ -56,21 +56,22 @@ const LOG_MIDDLEWARE = (req, res, next) => {
 const store = new MemoryStore({ 
   checkPeriod: checkPeriodMs
 });
-const sess = session({
-    secret: 'keyboard cat', // TODO: pull secret from environment
-    cookie: { maxAge: maxAgeMs, secure: false, httpOnly: true, sameSite: 'lax', path: '/' },
-    store,
-    resave: false,
-    saveUninitialized: true
-});
+
+const sessionOpts = {
+  secret: 'keyboard cat', // TODO: pull secret from environment
+  cookie: { maxAge: maxAgeMs, secure: false, httpOnly: true, sameSite: 'lax', path: '/' },
+  store,
+  resave: false,
+  saveUninitialized: true
+};
 
 if (app.get('env') === 'production') {
-    app.set('trust proxy', 1) // trust first proxy
-    sess.cookie.secure = true // serve secure cookies
+  app.set('trust proxy', 1) // trust first proxy
+  sessionOpts.cookie.secure = true // serve secure cookies
 }
 
 // Pre-route middleware
-app.use(sess);
+app.use(session(sessionOpts));
 app.use(LOG_MIDDLEWARE);
 app.use(cors(corsOptions));
 
