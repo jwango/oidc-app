@@ -5,6 +5,8 @@ import { useState } from 'react';
 
 export default function Home() {
 
+  const gatewayUrl = process.env.GW_URL || "http://localhost:8080";
+
   const [state, setState] = useState({
     userInfo: {},
     games: [],
@@ -18,67 +20,67 @@ export default function Home() {
 
   function login() {
     const userState = encodeURIComponent(window.location.href);
-    const newUrl = `http://localhost:8080/login?state=${userState}`;
+    const newUrl = `${gatewayUrl}/login?state=${userState}`;
     console.log(`redirect to ${newUrl}`);
     window.location.replace(newUrl);
   }
 
   function getUserInfo() {
-    fetch("http://localhost:8080/api/users/myself", { credentials: 'include' })
+    fetch(`${gatewayUrl}/api/users/myself`, { credentials: 'include' })
       .then(res => res.json())
       .then(body => setState({ ...state, userInfo: body, lastRes: body }));
   }
 
   function getGames() {
-    fetch("http://localhost:8080/api/users/myself/games", { credentials: 'include' })
+    fetch(`${gatewayUrl}/api/users/myself/games`, { credentials: 'include' })
     .then(res => res.json())
     .then(body => setState({ ...state, games: body, lastRes: body }));
   }
 
   function createGame() {
-    fetch("http://localhost:8080/api/users/myself/games", { method: 'POST', credentials: 'include' })
+    fetch(`${gatewayUrl}/api/users/myself/games`, { method: 'POST', credentials: 'include' })
     .then(res => res.json())
     .then(body => setState({ ...state, hostedGame: body, lastRes: body }));
   }
 
   function refreshGame(gameId) {
-    fetch(`http://localhost:8080/api/users/myself/games/${gameId}/state`, { credentials: 'include' })
+    fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/state`, { credentials: 'include' })
     .then(res => res.json())
     .then(body => setState({ ...state, hostedGame: body, lastRes: body }));
   }
 
   function startGame(gameId) {
-    fetch(`http://localhost:8080/api/users/myself/games/${gameId}/state`, { method: 'PUT', credentials: 'include', body: '{ "state": "RUNNING" }' })
+    fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/state`, { method: 'PUT', credentials: 'include', body: '{ "state": "RUNNING" }' })
     .then(res => res.json())
     .then(body => setState({ ...state, hostedGame: body, lastRes: body }));
   }
 
   function createUser() {
-    fetch("http://localhost:8080/api/users", { method: 'POST', credentials: 'include' })
+    fetch(`${gatewayUrl}/api/users`, { method: 'POST', credentials: 'include' })
     .then(res => res.json())
     .then(body => setState({ ...state, lastRes: body }))
   }
 
   function registerFor(gameId) {
-    fetch(`http://localhost:8080/api/games/${gameId}/registration`, { method: 'POST', credentials: 'include', body: '' })
+    fetch(`${gatewayUrl}/api/games/${gameId}/registration`, { method: 'POST', credentials: 'include', body: '' })
     .then(res => res.json())
     .then(body => setState({ ...state, lastRes: body }));
   }
 
   function getGameData(gameId) {
-    fetch(`http://localhost:8080/api/users/myself/games/${gameId}/data`, { credentials: 'include' })
+    fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/data`, { credentials: 'include' })
     .then(res => res.json())
     .then(body => setState({ ...state, currentGame: body, lastRes: body }));
   }
 
   function getMoves(gameId) {
-    fetch(`http://localhost:8080/api/users/myself/games/${gameId}/moves`, { credentials: 'include' })
+    fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/moves`, { credentials: 'include' })
     .then(res => res.json())
     .then(body => setState({ ...state, currentMoves: body, lastRes: body }));
   }
 
   function makeMove(gameId, moveIndex) {
-    fetch(`http://localhost:8080/api/users/myself/games/${gameId}/moves`, { method: 'POST', credentials: 'include', body: JSON.stringify(state.currentMoves[moveIndex]) })
+    fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/moves`, { method: 'POST', credentials: 'include', body: JSON.stringify(state.currentMoves[moveIndex]) })
     .then(res => res.json())
     .then(body => setState({ ...state, lastRes: {} }));
   }
@@ -95,11 +97,12 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <Head>
-        <title>Create Next App</title>
+        <title>jwango games</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className={styles.main}>
+        <h1>Game Interface</h1>
         <section className={styles["state-container"]}>
           <h2>State</h2>
           {renderStateDetails(state, "userInfo")}
