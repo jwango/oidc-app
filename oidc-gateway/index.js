@@ -151,7 +151,7 @@ app.get('/userinfo', CSRF_MIDDLEWARE, async (req, res, next) => {
   }
 });
 
-app.use('/api', proxy(`${PROXY_URL}`, {
+app.use('/api', CSRF_MIDDLEWARE, proxy(`${PROXY_URL}`, {
   proxyReqPathResolver: function(req) {
     return `/api${req.url}`;
   },
