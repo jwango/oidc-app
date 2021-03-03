@@ -157,6 +157,8 @@ app.use('/api', proxy(`${PROXY_URL}`, {
   proxyReqOptDecorator: function(proxyReqOpts, req) {
     if (req.session.tokenState && req.session.tokenState.access_token) {
       proxyReqOpts.headers['Authorization'] = `Bearer ${req.session.tokenState.access_token}`
+    } else {
+      console.log("No access token found for session to proxy with");
     }
     return proxyReqOpts
   }
