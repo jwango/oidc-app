@@ -6,9 +6,6 @@ const proxy = require('express-http-proxy');
 const uidSafe = require('uid-safe');
 require('isomorphic-fetch');
 
-const AuthClient = require('./auth')();
-const HttpUtils = require('./http');
-
 const app = express();
 const maxAgeMs = process.env.COOKIE_MAX_AGE_MS || 1000 * 60 * 30; // 30 min
 const checkPeriodMs = process.env.COOKIE_CHECK_PERIOD_MS || 1000 * 60 * 60; // 60 min
@@ -18,6 +15,9 @@ const HOST_URL = process.env.HOST_URL || `http://localhost:${PORT}`;
 const ALLOWED_ORIGINS = [APP_URL];
 const ALLOWED_REFERER_ORIGINS = [APP_URL, HOST_URL];
 const PROXY_URL = process.env.PROXY_URL || "localhost:8000";
+
+const AuthClient = require('./auth')(HOST_URL);
+const HttpUtils = require('./http');
 
 const corsOptions = {
   origin: APP_URL,

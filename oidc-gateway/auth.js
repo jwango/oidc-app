@@ -3,9 +3,9 @@ const FormData = require('form-data');
 const jwt = require('jsonwebtoken');
 const jwksClient = require('jwks-rsa');
 
-const AuthClient = function() {
+const AuthClient = function(hostUrl) {
     const WELL_KNOWN_URI = "https://accounts.google.com/.well-known/openid-configuration";
-    const REDIRECT_URI = "http://localhost:8080/auth_handler";
+    const REDIRECT_URI = `${hostUrl}/auth_handler`;
     const CLIENT_ID = process.env.CLIENT_ID;
     const CLIENT_SECRET = process.env.CLIENT_SECRET;
 
