@@ -3,9 +3,15 @@ import styles from '../styles/Home.module.css'
 import fetch from 'isomorphic-fetch'
 import { useState } from 'react';
 
-export default function Home() {
+export async function getStaticProps() {
+  return {
+    props: {
+      gatewayUrl: process.env.GW_URL || "http://localhost:8080"
+    },
+  }
+}
 
-  const gatewayUrl = process.env.GW_URL || "http://localhost:8080";
+export default function Home({ gatewayUrl }) {
 
   const [state, setState] = useState({
     userInfo: {},
