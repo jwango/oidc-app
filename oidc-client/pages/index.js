@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'  
 import fetch from 'isomorphic-fetch'
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 
 export async function getStaticProps() {
   return {
@@ -13,6 +13,8 @@ export async function getStaticProps() {
 
 export default function Home({ gatewayUrl }) {
 
+  const gameEnabled = false;
+
   const [state, setState] = useState({
     userInfo: {},
     games: [],
@@ -22,6 +24,7 @@ export default function Home({ gatewayUrl }) {
     currentMoves: [],
     moveIndex: 0,
     lastRes: {},
+    lastErr: {}
   });
 
   function login() {
@@ -31,64 +34,80 @@ export default function Home({ gatewayUrl }) {
     window.location.replace(newUrl);
   }
 
+  function logout() {
+    fetch(`${gatewayUrl}/logout`, { credentials: 'include' })
+      .then(handleFetchResponse)
+      .catch(err => setState({ ...state, lastErr: err }));
+  }
+
   function getUserInfo() {
     fetch(`${gatewayUrl}/api/users/myself`, { credentials: 'include' })
-      .then(res => res.json())
-      .then(body => setState({ ...state, userInfo: body, lastRes: body }));
+      .then(handleFetchResponse)
+      .then(body => setState({ ...state, userInfo: body, lastRes: body }))
+      .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function getGames() {
     fetch(`${gatewayUrl}/api/users/myself/games`, { credentials: 'include' })
-    .then(res => res.json())
-    .then(body => setState({ ...state, games: body, lastRes: body }));
+    .then(handleFetchResponse)
+    .then(body => setState({ ...state, games: body, lastRes: body }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function createGame() {
     fetch(`${gatewayUrl}/api/users/myself/games`, { method: 'POST', credentials: 'include' })
-    .then(res => res.json())
-    .then(body => setState({ ...state, hostedGame: body, lastRes: body }));
+    .then(handleFetchResponse)
+    .then(body => setState({ ...state, hostedGame: body, lastRes: body }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function refreshGame(gameId) {
     fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/state`, { credentials: 'include' })
-    .then(res => res.json())
-    .then(body => setState({ ...state, hostedGame: body, lastRes: body }));
+    .then(handleFetchResponse)
+    .then(body => setState({ ...state, hostedGame: body, lastRes: body }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function startGame(gameId) {
     fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/state`, { method: 'PUT', credentials: 'include', body: '{ "state": "RUNNING" }' })
-    .then(res => res.json())
-    .then(body => setState({ ...state, hostedGame: body, lastRes: body }));
+    .then(handleFetchResponse)
+    .then(body => setState({ ...state, hostedGame: body, lastRes: body }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function createUser() {
     fetch(`${gatewayUrl}/api/users`, { method: 'POST', credentials: 'include' })
-    .then(res => res.json())
+    .then(handleFetchResponse)
     .then(body => setState({ ...state, lastRes: body }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function registerFor(gameId) {
     fetch(`${gatewayUrl}/api/games/${gameId}/registration`, { method: 'POST', credentials: 'include', body: '' })
-    .then(res => res.json())
-    .then(body => setState({ ...state, lastRes: body }));
+    .then(handleFetchResponse)
+    .then(body => setState({ ...state, lastRes: body }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function getGameData(gameId) {
     fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/data`, { credentials: 'include' })
-    .then(res => res.json())
-    .then(body => setState({ ...state, currentGame: body, lastRes: body }));
+    .then(handleFetchResponse)
+    .then(body => setState({ ...state, currentGame: body, lastRes: body }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function getMoves(gameId) {
     fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/moves`, { credentials: 'include' })
-    .then(res => res.json())
-    .then(body => setState({ ...state, currentMoves: body, lastRes: body }));
+    .then(handleFetchResponse)
+    .then(body => setState({ ...state, currentMoves: body, lastRes: body }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function makeMove(gameId, moveIndex) {
     fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/moves`, { method: 'POST', credentials: 'include', body: JSON.stringify(state.currentMoves[moveIndex]) })
-    .then(res => res.json())
-    .then(body => setState({ ...state, lastRes: {} }));
+    .then(handleFetchResponse)
+    .then(body => setState({ ...state, lastRes: {} }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function handleGameIdInput(event) {
@@ -100,6 +119,14 @@ export default function Home({ gatewayUrl }) {
     setState({ ...state, moveIndex })
   }
 
+  function handleFetchResponse(res) {
+    if (res.ok) {
+      return res.json();
+    } else {
+      throw { status: res.status, statusText: res.statusText, body: res.text() };
+    }
+  }
+
   return (
     <div className={styles.container}>
       <Head>
@@ -108,33 +135,42 @@ export default function Home({ gatewayUrl }) {
       </Head>
 
       <main className={styles.main}>
-        <h1>Game Interface</h1>
+        <h1>{gameEnabled ? "Game Interface" : "User Interface" }</h1>
         <section className={styles["state-container"]}>
           <h2>State</h2>
           {renderStateDetails(state, "userInfo")}
-          {renderStateDetails(state, "games")}
-          {renderStateDetails(state, "hostedGame")}
-          {renderStateDetails(state, "gameIdInput", false)}
-          {renderStateDetails(state, "currentGame")}
-          {renderStateDetails(state, "currentMoves")}
-          {renderStateDetails(state, "moveIndex", false)}
+          {condRender(renderStateDetails(state, "games"), gameEnabled)}
+          {condRender(renderStateDetails(state, "hostedGame"), gameEnabled)}
+          {condRender(renderStateDetails(state, "gameIdInput", false), gameEnabled)}
+          {condRender(renderStateDetails(state, "currentGame"), gameEnabled)}
+          {condRender(renderStateDetails(state, "currentMoves"), gameEnabled)}
+          {condRender(renderStateDetails(state, "moveIndex", false), gameEnabled)}
           {renderStateDetails(state, "lastRes")}
+          {renderStateDetails(state, "lastErr", false)}
         </section>
         <section className={styles["controls-container"]}>
           <button onClick={login}>Login!</button>
+          <button onClick={logout}>Logout</button>
           <button onClick={createUser}>Create Account</button>
           <button onClick={getUserInfo}>User Info</button>
-          <button onClick={getGames}>Get Games</button>
-          <button onClick={createGame}>Create Game</button>
-          <button onClick={() => refreshGame(state.hostedGame.id)}>Refresh Game Status</button>
+          {condRender(
+          <Fragment>
+            <button onClick={getGames}>Get Games</button>
+            <button onClick={createGame}>Create Game</button>
+            <button onClick={() => refreshGame(state.hostedGame.id)}>Refresh Game Status</button>
+          </Fragment>,
+          gameEnabled)}
         </section>
+        {condRender(
         <section className={styles["controls-container"]}>
           <label>Game Id:
             <input type="text" value={state.gameIdInput} onChange={handleGameIdInput}></input>
           </label>
           <button onClick={() => startGame(state.gameIdInput)}>Start Game!</button>
           <button onClick={() => registerFor(state.gameIdInput)}>Register For Game</button>
-        </section>
+        </section>,
+        gameEnabled)}
+        {condRender(
         <section className={styles["controls-container"]}>
           <button onClick={() => getGameData(state.gameIdInput)}>Get Game Data</button>
           <button onClick={() => getMoves(state.gameIdInput)}>Get Moves</button>
@@ -142,10 +178,19 @@ export default function Home({ gatewayUrl }) {
             <input type="number" value={state.moveIndex} onChange={handleMoveInput}></input>
           </label>
           <button onClick={() => makeMove(state.gameIdInput, state.moveIndex)}>Make Move</button>
-        </section>
+        </section>,
+        gameEnabled)}
       </main>
     </div>
   )
+}
+
+function condRender(component, condition) {
+  if (condition) {
+    return component;
+  } else {
+    return null;
+  }
 }
 
 function renderStateDetails(state, prop, canCollapse = true) {

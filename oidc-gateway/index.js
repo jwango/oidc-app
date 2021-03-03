@@ -27,6 +27,16 @@ const corsOptions = {
   credentials: true
 };
 
+const ACCESS_TOKEN_MIDDLEWARE = (req, res, next) => {
+  if (req.session.tokenState && req.session.tokenState.access_token) {
+    next();
+  } else {
+    console.log("Required access token not found for session.");
+    res.status(401);
+    res.send("Unauthorized");
+  }
+}
+
 const CSRF_MIDDLEWARE = (req, res, next) => {
   const origin = req.get("Origin");
   const referer = req.get("Referer");
@@ -90,7 +100,15 @@ app.get('/', CSRF_MIDDLEWARE, (req, res, next) => {
   res.send('Hello world');
 });
 
-// Proxy setup
+// Auth setup
+app.get('/logout', CSRF_MIDDLEWARE, (req, res, next) => {
+  if (req.session.tokenState) {
+    req.session.tokenState = undefined;
+  }
+  res.status(200);
+  res.send();
+});
+
 app.get('/login', CSRF_MIDDLEWARE, async (req, res, next) => {
   let loggedIn = false;
   if (req.session.tokenState) {
@@ -155,27 +173,19 @@ app.get('/auth_handler', async (req, res, next) => {
   }
 });
 
-app.get('/userinfo', CSRF_MIDDLEWARE, async (req, res, next) => {
-  if (req.session.tokenState && req.session.tokenState.access_token) {
-    const response = await AuthClient.getUserInfo(req.session.tokenState.access_token);
-    res.status(response.status);
-    res.json(await response.json());
-  } else {
-    res.status(401);
-    res.send('Unauthorized');
-  }
+app.get('/userinfo', CSRF_MIDDLEWARE, ACCESS_TOKEN_MIDDLEWARE, async (req, res, next) => {
+  const response = await AuthClient.getUserInfo(req.session.tokenState.access_token);
+  res.status(response.status);
+  res.json(await response.json());
 });
 
-app.use('/api', CSRF_MIDDLEWARE, proxy(`${PROXY_URL}`, {
+// Proxy
+app.use('/api', CSRF_MIDDLEWARE, ACCESS_TOKEN_MIDDLEWARE, proxy(`${PROXY_URL}`, {
   proxyReqPathResolver: function(req) {
     return `/api${req.url}`;
   },
   proxyReqOptDecorator: function(proxyReqOpts, req) {
-    if (req.session.tokenState && req.session.tokenState.access_token) {
-      proxyReqOpts.headers['Authorization'] = `Bearer ${req.session.tokenState.access_token}`
-    } else {
-      console.log("No access token found for session to proxy with");
-    }
+    proxyReqOpts.headers['Authorization'] = `Bearer ${req.session.tokenState.access_token}`
     return proxyReqOpts
   }
 }));
