@@ -47,6 +47,9 @@ const CSRF_MIDDLEWARE = (req, res, next) => {
     }
   } else {
     failedCsrf = true;
+    res.status(401);
+    res.send("Unauthorized");
+    console.log("No origin or referer header found.")
   }
   if (!failedCsrf) { next(); }
 };
