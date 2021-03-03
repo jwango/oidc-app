@@ -125,7 +125,7 @@ app.get('/auth_handler', async (req, res, next) => {
     const decoded = await AuthClient.verifyToken(tokenState.id_token, nonceToCheck);
 
     // correlate the token to the user session
-    const originalState = req.session.state.split(".", 2)[1];
+    const originalState = req.session.state.split(".").slice(1).join(".");
     const redirectUrl = originalState || APP_URL;
     console.log(`Redirecting to ${redirectUrl}`);
     req.session.tokenState = tokenState;
