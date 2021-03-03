@@ -72,6 +72,7 @@ const sessionOpts = {
 if (app.get('env') === 'production') {
   app.set('trust proxy', 1) // trust first proxy
   sessionOpts.cookie.secure = true // serve secure cookies
+  sessionOpts.cookie.sameSite = 'none'
 }
 
 // Pre-route middleware
