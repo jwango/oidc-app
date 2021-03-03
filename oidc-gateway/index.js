@@ -15,6 +15,7 @@ const HOST_URL = process.env.HOST_URL || `http://localhost:${PORT}`;
 const ALLOWED_ORIGINS = [APP_URL];
 const ALLOWED_REFERER_ORIGINS = [APP_URL, HOST_URL];
 const PROXY_URL = process.env.PROXY_URL || "localhost:8000";
+const DEBUG_OIDC = (process.env.DEBUG_OIDC === "true") || (process.env.DEBUG_OIDC === true) || false;
 
 const AuthClient = require('./auth')(HOST_URL);
 const HttpUtils = require('./http');
@@ -49,6 +50,9 @@ const CSRF_MIDDLEWARE = (req, res, next) => {
 
 const LOG_MIDDLEWARE = (req, res, next) => {
   console.log(`${req.path}: ${req.session.id}`);
+  if (DEBUG_OIDC) {
+    console.log(req.headers);
+  }
   next();
 }
 
