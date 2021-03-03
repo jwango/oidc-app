@@ -127,6 +127,7 @@ app.get('/auth_handler', async (req, res, next) => {
     // correlate the token to the user session
     const originalState = req.session.state.split(".", 2)[1];
     const redirectUrl = originalState || APP_URL;
+    console.log(`Redirecting to ${redirectUrl}`);
     req.session.tokenState = tokenState;
     req.session.save(err => {
       if (err) { next(err); }
