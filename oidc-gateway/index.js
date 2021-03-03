@@ -79,6 +79,10 @@ app.use(session(sessionOpts));
 app.use(LOG_MIDDLEWARE);
 app.use(cors(corsOptions));
 
+app.get('/', CSRF_MIDDLEWARE, (req, res, next) => {
+  res.send('Hello world');
+});
+
 // Proxy setup
 app.get('/login', CSRF_MIDDLEWARE, async (req, res, next) => {
   let loggedIn = false;
