@@ -4,7 +4,7 @@
     "description": "",
     "scripts": {
       "heroku-prebuild": "cd oidc-gateway && npm ci",
-      "start": "node oidc-gateway/index.js"
+      "start": "cd oidc-gateway && node index.js"
     },
     "author": "jwango",
     "license": "ISC"
