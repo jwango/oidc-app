@@ -10,8 +10,8 @@ const AuthClient = require('./auth')();
 const HttpUtils = require('./http');
 
 const app = express();
-const maxAgeMs = 1000 * 60 * 30; // 30 min
-const checkPeriodMs = 1000 * 60 * 60; // 60 min
+const maxAgeMs = process.env.COOKIE_MAX_AGE_MS || 1000 * 60 * 30; // 30 min
+const checkPeriodMs = process.env.COOKIE_CHECK_PERIOD_MS || 1000 * 60 * 60; // 60 min
 const PORT = process.env.PORT || 8080;
 const APP_URL = process.env.APP_URL || "http://localhost:3000";
 const HOST_URL = process.env.HOST_URL || `http://localhost:${PORT}`;
