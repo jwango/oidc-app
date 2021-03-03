@@ -15,7 +15,7 @@ export default function Home({ gatewayUrl }) {
 
   const gameEnabled = false;
 
-  const initialState = {
+  const initialState ={
     userInfo: {},
     games: [],
     hostedGame: '',
@@ -27,7 +27,7 @@ export default function Home({ gatewayUrl }) {
     lastErr: {}
   };
 
-  const [state, setState] = useState({ ...initialState });
+  const [state, setState] = useState(initialState);
 
   function login() {
     const userState = encodeURIComponent(window.location.href);
@@ -37,90 +37,89 @@ export default function Home({ gatewayUrl }) {
   }
 
   function logout() {
-    const baseState = { ...initialState };
     fetch(`${gatewayUrl}/logout`, { credentials: 'include' })
       .then(res => handleFetchResponse(res, false))
-      .then(() => setState({ ...baseState, lastRes: "Logged out" }))
-      .catch(err => setState({ lastErr: err }));
+      .then(() => setState({ ...initialState, lastRes: "Logged out" }))
+      .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function getUserInfo() {
     fetch(`${gatewayUrl}/api/users/myself`, { credentials: 'include' })
       .then(handleFetchResponse)
-      .then(body => setState({ userInfo: body, lastRes: body }))
-      .catch(err => setState({ lastErr: err }));
+      .then(body => setState({ ...state, userInfo: body, lastRes: body }))
+      .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function getGames() {
     fetch(`${gatewayUrl}/api/users/myself/games`, { credentials: 'include' })
     .then(handleFetchResponse)
-    .then(body => setState({ games: body, lastRes: body }))
-    .catch(err => setState({ lastErr: err }));
+    .then(body => setState({ ...state, games: body, lastRes: body }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function createGame() {
     fetch(`${gatewayUrl}/api/users/myself/games`, { method: 'POST', credentials: 'include' })
     .then(handleFetchResponse)
-    .then(body => setState({ hostedGame: body, lastRes: body }))
-    .catch(err => setState({ lastErr: err }));
+    .then(body => setState({ ...state, hostedGame: body, lastRes: body }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function refreshGame(gameId) {
     fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/state`, { credentials: 'include' })
     .then(handleFetchResponse)
-    .then(body => setState({ hostedGame: body, lastRes: body }))
-    .catch(err => setState({ lastErr: err }));
+    .then(body => setState({ ...state, hostedGame: body, lastRes: body }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function startGame(gameId) {
     fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/state`, { method: 'PUT', credentials: 'include', body: '{ "state": "RUNNING" }' })
     .then(handleFetchResponse)
-    .then(body => setState({ hostedGame: body, lastRes: body }))
-    .catch(err => setState({ lastErr: err }));
+    .then(body => setState({ ...state, hostedGame: body, lastRes: body }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function createUser() {
     fetch(`${gatewayUrl}/api/users`, { method: 'POST', credentials: 'include' })
     .then(handleFetchResponse)
-    .then(body => setState({ lastRes: body }))
-    .catch(err => setState({ lastErr: err }));
+    .then(body => setState({ ...state, lastRes: body }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function registerFor(gameId) {
     fetch(`${gatewayUrl}/api/games/${gameId}/registration`, { method: 'POST', credentials: 'include', body: '' })
     .then(handleFetchResponse)
-    .then(body => setState({ lastRes: body }))
-    .catch(err => setState({ lastErr: err }));
+    .then(body => setState({ ...state, lastRes: body }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function getGameData(gameId) {
     fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/data`, { credentials: 'include' })
     .then(handleFetchResponse)
-    .then(body => setState({ currentGame: body, lastRes: body }))
-    .catch(err => setState({ lastErr: err }));
+    .then(body => setState({ ...state, currentGame: body, lastRes: body }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function getMoves(gameId) {
     fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/moves`, { credentials: 'include' })
     .then(handleFetchResponse)
-    .then(body => setState({ currentMoves: body, lastRes: body }))
-    .catch(err => setState({ lastErr: err }));
+    .then(body => setState({ ...state, currentMoves: body, lastRes: body }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function makeMove(gameId, moveIndex) {
     fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/moves`, { method: 'POST', credentials: 'include', body: JSON.stringify(state.currentMoves[moveIndex]) })
     .then(handleFetchResponse)
-    .then(body => setState({ lastRes: {} }))
-    .catch(err => setState({ lastErr: err }));
+    .then(body => setState({ ...state, lastRes: {} }))
+    .catch(err => setState({ ...state, lastErr: err }));
   }
 
   function handleGameIdInput(event) {
-    setState({ gameIdInput: event.target.value });
+    setState({ ...state, gameIdInput: event.target.value });
   }
 
   function handleMoveInput(event) {
     const moveIndex = Math.min(Math.max(0, event.target.value), state.currentMoves.length - 1);
-    setState({ moveIndex })
+    setState({ ...state, moveIndex })
   }
 
   function handleFetchResponse(res, useJson = true) {
