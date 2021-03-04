@@ -13,12 +13,13 @@ export async function getStaticProps() {
 
 export default function Home({ gatewayUrl }) {
 
-  const gameEnabled = false;
+  const gameEnabled = true;
 
   const initialState ={
     userInfo: {},
     games: [],
     hostedGame: '',
+    gamePinInput: '',
     gameIdInput: '',
     currentGame: {},
     currentMoves: [],
@@ -85,8 +86,8 @@ export default function Home({ gatewayUrl }) {
     .catch(err => setState({ ...state, lastErr: err }));
   }
 
-  function registerFor(gameId) {
-    fetch(`${gatewayUrl}/api/games/${gameId}/registration`, { method: 'POST', credentials: 'include', body: '' })
+  function registerFor(gamePin) {
+    fetch(`${gatewayUrl}/api/lobby/${gamePin}/registration`, { method: 'POST', credentials: 'include', body: '' })
     .then(handleFetchResponse)
     .then(body => setState({ ...state, lastRes: body }))
     .catch(err => setState({ ...state, lastErr: err }));
@@ -113,12 +114,16 @@ export default function Home({ gatewayUrl }) {
     .catch(err => setState({ ...state, lastErr: err }));
   }
 
-  function handleGameIdInput(event) {
-    setState({ ...state, gameIdInput: event.target.value });
+  function handleGameIdInput(input) {
+    setState({ ...state, gameIdInput: input });
   }
 
-  function handleMoveInput(event) {
-    const moveIndex = Math.min(Math.max(0, event.target.value), state.currentMoves.length - 1);
+  function handleGamePinInput(input) {
+    setState({ ...state, gamePinInput: input });
+  }
+
+  function handleMoveInput(input) {
+    const moveIndex = Math.min(Math.max(0, input), state.currentMoves.length - 1);
     setState({ ...state, moveIndex })
   }
 
@@ -134,6 +139,24 @@ export default function Home({ gatewayUrl }) {
     }
   }
 
+  function renderGames(games) {
+    if (!games) { return null; }
+    const gameElements = games.map(game => <li key={game.id}>
+      {renderJson(game, false)}
+      <button onClick={() => { handleGameIdInput(game.id); handleGamePinInput(game.pin) } }>Select</button>
+    </li>)
+    return <ul>{gameElements}</ul>
+  }
+  
+  function renderMoves(moves) {
+    if (!moves) { return null; }
+    const moveElements = moves.map((move, index) => <li key={index}>
+      {renderJson(move)}
+      <button onClick={() => handleMoveInput(index)}>Select</button>
+    </li>)
+    return <ul>{moveElements}</ul>
+  }
+
   return (
     <div className={styles.container}>
       <Head>
@@ -146,14 +169,12 @@ export default function Home({ gatewayUrl }) {
         <section className={styles["state-container"]}>
           <h2>State</h2>
           {renderStateDetails(state, "userInfo")}
-          {condRender(renderStateDetails(state, "games"), gameEnabled)}
+          {condRender(renderStateDetails(state, "games", renderGames), gameEnabled)}
           {condRender(renderStateDetails(state, "hostedGame"), gameEnabled)}
-          {condRender(renderStateDetails(state, "gameIdInput", false), gameEnabled)}
           {condRender(renderStateDetails(state, "currentGame"), gameEnabled)}
-          {condRender(renderStateDetails(state, "currentMoves"), gameEnabled)}
-          {condRender(renderStateDetails(state, "moveIndex", false), gameEnabled)}
-          {renderStateDetails(state, "lastRes")}
-          {renderStateDetails(state, "lastErr", false)}
+          {condRender(renderStateDetails(state, "currentMoves", renderMoves), gameEnabled)}
+          {renderState(state, "lastRes")}
+          {renderState(state, "lastErr")}
         </section>
         <section className={styles["controls-container"]}>
           <button onClick={login}>Login!</button>
@@ -164,17 +185,19 @@ export default function Home({ gatewayUrl }) {
           <Fragment>
             <button onClick={getGames}>Get Games</button>
             <button onClick={createGame}>Create Game</button>
-            <button onClick={() => refreshGame(state.hostedGame.id)}>Refresh Game Status</button>
           </Fragment>,
           gameEnabled)}
         </section>
         {condRender(
         <section className={styles["controls-container"]}>
           <label>Game Id:
-            <input type="text" value={state.gameIdInput} onChange={handleGameIdInput}></input>
+            <input type="text" value={state.gameIdInput} onChange={(event) => handleGameIdInput(event.target.value)}></input>
           </label>
           <button onClick={() => startGame(state.gameIdInput)}>Start Game!</button>
-          <button onClick={() => registerFor(state.gameIdInput)}>Register For Game</button>
+          <label>Game Pin:
+            <input type="text" value={state.gamePinInput} onChange={(event) => handleGamePinInput(event.target.value) }></input>
+          </label>
+          <button onClick={() => registerFor(state.gamePinInput)}>Register For Game</button>
         </section>,
         gameEnabled)}
         {condRender(
@@ -182,7 +205,7 @@ export default function Home({ gatewayUrl }) {
           <button onClick={() => getGameData(state.gameIdInput)}>Get Game Data</button>
           <button onClick={() => getMoves(state.gameIdInput)}>Get Moves</button>
           <label>Move Index:
-            <input type="number" value={state.moveIndex} onChange={handleMoveInput}></input>
+            <input type="number" value={state.moveIndex} onChange={(event) => handleMoveInput(event.target.value) }></input>
           </label>
           <button onClick={() => makeMove(state.gameIdInput, state.moveIndex)}>Make Move</button>
         </section>,
@@ -200,15 +223,19 @@ function condRender(component, condition) {
   }
 }
 
-function renderStateDetails(state, prop, canCollapse = true) {
-  if (canCollapse) {
-    return (
-      <details>
-        <summary>{prop}</summary>
-        <pre className={styles["state-details"]}>{JSON.stringify(state[prop], null, 2)}</pre>
-      </details>
-    )
-  } else {
-    return <pre>{prop}: {JSON.stringify(state[prop])}</pre>
-  }
+function renderStateDetails(state, prop, renderFn = renderJson) {
+  return (
+    <details>
+      <summary>{prop}</summary>
+      <section className={styles["state-details"]}>{renderFn(state[prop])}</section>
+    </details>
+  )
+}
+
+function renderState(state, prop) {
+  return <label>{prop}: {renderJson(state[prop], false)}</label>
+}
+
+function renderJson(data, formatted = true) {
+  return <pre>{JSON.stringify(data, null, formatted ? 2 : null)}</pre>
 }
