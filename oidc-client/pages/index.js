@@ -152,13 +152,31 @@ export default function Home({ gatewayUrl }) {
     }
   }
 
+  function renderGamesGrouped(games) {
+     if (!games) { return null; }
+     const gameMap = groupGamesByStatus(games);
+     const gameGroupElements = Object.keys(gameMap).map(gameState => <li key={gameState}>
+       {renderStateDetails(gameMap[gameState], gameState, renderGames)}
+     </li>);
+    return <ul>{gameGroupElements}</ul>
+  }
+
   function renderGames(games) {
-    if (!games) { return null; }
+    if (!games) { return null; }    
     const gameElements = games.map(game => <li key={game.id}>
       {renderJson(game, false)}
       <button onClick={() => { handleGameInput({ gameId: game.id, pin: game.pin }); } }>Select</button>
-    </li>)
+    </li>);
     return <ul>{gameElements}</ul>
+  }
+
+  function groupGamesByStatus(games) {
+    const gameMap = {};
+    games.forEach(game => {
+      if (!gameMap[game.state]) { gameMap[game.state] = []; }
+      gameMap[game.state].push(game);
+    });
+    return gameMap;
   }
   
   function renderMoves(moves) {
@@ -182,7 +200,7 @@ export default function Home({ gatewayUrl }) {
         <section className={styles["state-container"]}>
           <h2>State</h2>
           {renderStateDetails(state.userInfo, "userInfo")}
-          {condRender(renderStateDetails(state.games, "games", renderGames), gameEnabled)}
+          {condRender(renderStateDetails(state.games, "games", renderGamesGrouped), gameEnabled)}
           {condRender(renderStateDetails(state.hostedGame, "hostedGame"), gameEnabled)}
           {condRender(renderStateDetails(currentGame, "currentGame"), gameEnabled)}
           {condRender(renderStateDetails(currentMoves, "currentMoves", renderMoves), gameEnabled)}
