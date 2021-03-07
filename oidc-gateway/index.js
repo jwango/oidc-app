@@ -96,8 +96,8 @@ app.use(session(sessionOpts));
 app.use(LOG_MIDDLEWARE);
 app.use(cors(corsOptions));
 
-app.get('/', CSRF_MIDDLEWARE, (req, res, next) => {
-  res.send('Hello world');
+app.get('/health', (req, res, next) => {
+  res.json({ status: "RUNNING" });
 });
 
 // Auth setup
@@ -153,8 +153,6 @@ app.get('/auth_handler', async (req, res, next) => {
     await savePromise;
 
     // verify the token
-    console.log(tokenState.access_token);
-    console.log(tokenState.expires_in);
     const decoded = await AuthClient.verifyToken(tokenState.id_token, nonceToCheck);
 
     // correlate the token to the user session
