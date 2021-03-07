@@ -19,8 +19,7 @@ export default function Home({ gatewayUrl }) {
     userInfo: {},
     games: [],
     gamePinInput: '',
-    gameIdInput: '',
-    moveIndex: 0,
+    gameIdInput: ''
   };
 
   const [state, setState] = useState(initialState);
@@ -137,11 +136,6 @@ export default function Home({ gatewayUrl }) {
     setState({ ...state, gameIdInput: gameId || "", gamePinInput: pin || "" });
   }
 
-  function handleMoveInput(input) {
-    const moveIndex = Math.min(Math.max(0, input), currentMoves.length - 1);
-    setState({ ...state, moveIndex })
-  }
-
   function handleFetchResponse(res, useJson = true) {
     if (res.ok) {
       if (useJson) {
@@ -185,7 +179,7 @@ export default function Home({ gatewayUrl }) {
     if (!moves) { return null; }
     const moveElements = moves.map((move, index) => <li key={index}>
       {renderJson(move)}
-      <button onClick={() => handleMoveInput(index)}>Select</button>
+      <button onClick={() =>  makeMove(state.gameIdInput, index)}>Make this move</button>
     </li>)
     return <ul>{moveElements}</ul>
   }
@@ -235,10 +229,6 @@ export default function Home({ gatewayUrl }) {
         <section className={styles["controls-container"]}>
           <button onClick={() => getGameData(state.gameIdInput)}>Get Game Data</button>
           <button onClick={() => getMoves(state.gameIdInput)}>Get Moves</button>
-          <label>Move Index:
-            <input type="number" value={state.moveIndex} onChange={(event) => handleMoveInput(event.target.value) }></input>
-          </label>
-          <button onClick={() => makeMove(state.gameIdInput, state.moveIndex)}>Make Move</button>
         </section>,
         gameEnabled)}
       </main>
