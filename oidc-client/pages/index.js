@@ -21,14 +21,13 @@ export default function Home({ gatewayUrl }) {
     hostedGame: '',
     gamePinInput: '',
     gameIdInput: '',
-    currentGame: {},
-    currentMoves: [],
     moveIndex: 0,
-    lastRes: {},
-    lastErr: {}
   };
 
   const [state, setState] = useState(initialState);
+  const [currentGame, setCurrentGame] = useState({});
+  const [currentMoves, setCurrentMoves] = useState([]);
+  const [lastRes, setLastRes] = useState({});
 
   function login() {
     const userState = encodeURIComponent(window.location.href);
@@ -40,86 +39,104 @@ export default function Home({ gatewayUrl }) {
   function logout() {
     fetch(`${gatewayUrl}/logout`, { credentials: 'include' })
       .then(res => handleFetchResponse(res, false))
-      .then(() => setState({ ...initialState, lastRes: "Logged out" }))
-      .catch(err => setState({ ...state, lastErr: err }));
+      .then(() => {
+        setState({ ...initialState });
+        setLastRes("Logged out");
+      })
+      .catch(err => setLastRes(err));
   }
 
   function getUserInfo() {
     fetch(`${gatewayUrl}/api/users/myself`, { credentials: 'include' })
       .then(handleFetchResponse)
-      .then(body => setState({ ...state, userInfo: body, lastRes: body }))
-      .catch(err => setState({ ...state, lastErr: err }));
+      .then(body => {
+        setState({ ...state, userInfo: body });
+        setLastRes(body);
+      })
+      .catch(err => setLastRes(err));
   }
 
   function getGames() {
     fetch(`${gatewayUrl}/api/users/myself/games`, { credentials: 'include' })
     .then(handleFetchResponse)
-    .then(body => setState({ ...state, games: body, lastRes: body }))
-    .catch(err => setState({ ...state, lastErr: err }));
+    .then(body => {
+      setState({ ...state, games: body });
+      setLastRes(body);
+    })
+    .catch(err => setLastRes(err));
   }
 
   function createGame() {
     fetch(`${gatewayUrl}/api/users/myself/games`, { method: 'POST', credentials: 'include' })
     .then(handleFetchResponse)
-    .then(body => setState({ ...state, hostedGame: body, lastRes: body }))
-    .catch(err => setState({ ...state, lastErr: err }));
-  }
-
-  function refreshGame(gameId) {
-    fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/state`, { credentials: 'include' })
-    .then(handleFetchResponse)
-    .then(body => setState({ ...state, hostedGame: body, lastRes: body }))
-    .catch(err => setState({ ...state, lastErr: err }));
+    .then(body => {
+      setState({ ...state, hostedGame: body });
+      setLastRes(body);
+    })
+    .catch(err => setLastRes(err));
   }
 
   function startGame(gameId) {
     fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/state`, { method: 'PUT', credentials: 'include', body: '{ "state": "RUNNING" }' })
     .then(handleFetchResponse)
-    .then(body => setState({ ...state, hostedGame: body, lastRes: body }))
-    .catch(err => setState({ ...state, lastErr: err }));
+    .then(body => {
+      setState({ ...state, hostedGame: body });
+      setLastRes(body);
+    })
+    .catch(err => setLastRes(err));
   }
 
   function createUser() {
     fetch(`${gatewayUrl}/api/users`, { method: 'POST', credentials: 'include' })
     .then(handleFetchResponse)
-    .then(body => setState({ ...state, lastRes: body }))
-    .catch(err => setState({ ...state, lastErr: err }));
+    .then(body => setLastRes(body))
+    .catch(err => setLastRes(err));
   }
 
   function registerFor(gamePin) {
     fetch(`${gatewayUrl}/api/lobby/${gamePin}/registration`, { method: 'POST', credentials: 'include', body: '' })
     .then(handleFetchResponse)
-    .then(body => setState({ ...state, lastRes: body }))
-    .catch(err => setState({ ...state, lastErr: err }));
+    .then(body => setLastRes(body))
+    .catch(err => setLastRes(err));
   }
 
   function getGameData(gameId) {
     fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/data`, { credentials: 'include' })
     .then(handleFetchResponse)
-    .then(body => setState({ ...state, currentGame: body, lastRes: body }))
-    .catch(err => setState({ ...state, lastErr: err }));
+    .then(body => {
+      setCurrentGame(body);
+      setLastRes(body);
+    })
+    .catch(err => setLastRes(err));
   }
 
   function getMoves(gameId) {
     fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/moves`, { credentials: 'include' })
     .then(handleFetchResponse)
-    .then(body => setState({ ...state, currentMoves: body, lastRes: body }))
-    .catch(err => setState({ ...state, lastErr: err }));
+    .then(body => {
+      setCurrentMoves(body);
+      setLastRes(body);
+    })
+    .catch(err => setLastRes(err));
   }
 
   function makeMove(gameId, moveIndex) {
-    fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/moves`, { method: 'POST', credentials: 'include', body: JSON.stringify(state.currentMoves[moveIndex]) })
-    .then(handleFetchResponse)
-    .then(body => setState({ ...state, lastRes: {} }))
-    .catch(err => setState({ ...state, lastErr: err }));
+    fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/moves`, { method: 'POST', credentials: 'include', body: JSON.stringify(currentMoves[moveIndex]) })
+    .then(res => handleFetchResponse(res, false))
+    .then(body => {
+      getGameData(gameId);
+      getMoves(gameId);
+      setLastRes("Move accepted.")
+    })
+    .catch(err => setLastRes(err));
   }
 
   function handleGameInput({ gameId = state.gameIdInput, pin = state.gamePinInput }) {
-    setState({ ...state, gameIdInput: gameId, gamePinInput: pin });
+    setState({ ...state, gameIdInput: gameId || "", gamePinInput: pin || "" });
   }
 
   function handleMoveInput(input) {
-    const moveIndex = Math.min(Math.max(0, input), state.currentMoves.length - 1);
+    const moveIndex = Math.min(Math.max(0, input), currentMoves.length - 1);
     setState({ ...state, moveIndex })
   }
 
@@ -164,13 +181,12 @@ export default function Home({ gatewayUrl }) {
         <h1>{gameEnabled ? "Game Interface" : "User Interface" }</h1>
         <section className={styles["state-container"]}>
           <h2>State</h2>
-          {renderStateDetails(state, "userInfo")}
-          {condRender(renderStateDetails(state, "games", renderGames), gameEnabled)}
-          {condRender(renderStateDetails(state, "hostedGame"), gameEnabled)}
-          {condRender(renderStateDetails(state, "currentGame"), gameEnabled)}
-          {condRender(renderStateDetails(state, "currentMoves", renderMoves), gameEnabled)}
-          {renderState(state, "lastRes")}
-          {renderState(state, "lastErr")}
+          {renderStateDetails(state.userInfo, "userInfo")}
+          {condRender(renderStateDetails(state.games, "games", renderGames), gameEnabled)}
+          {condRender(renderStateDetails(state.hostedGame, "hostedGame"), gameEnabled)}
+          {condRender(renderStateDetails(currentGame, "currentGame"), gameEnabled)}
+          {condRender(renderStateDetails(currentMoves, "currentMoves", renderMoves), gameEnabled)}
+          {renderState(lastRes, "lastRes")}
         </section>
         <section className={styles["controls-container"]}>
           <button onClick={login}>Login!</button>
@@ -219,17 +235,17 @@ function condRender(component, condition) {
   }
 }
 
-function renderStateDetails(state, prop, renderFn = renderJson) {
+function renderStateDetails(value, label, renderFn = renderJson) {
   return (
     <details>
-      <summary>{prop}</summary>
-      <section className={styles["state-details"]}>{renderFn(state[prop])}</section>
+      <summary>{label}</summary>
+      <section className={styles["state-details"]}>{renderFn(value)}</section>
     </details>
   )
 }
 
-function renderState(state, prop) {
-  return <label>{prop}: {renderJson(state[prop], false)}</label>
+function renderState(value, label) {
+  return <label>{label}: {renderJson(value, false)}</label>
 }
 
 function renderJson(data, formatted = true) {
