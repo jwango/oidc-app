@@ -18,7 +18,6 @@ export default function Home({ gatewayUrl }) {
   const initialState ={
     userInfo: {},
     games: [],
-    hostedGame: '',
     gamePinInput: '',
     gameIdInput: '',
     moveIndex: 0,
@@ -70,7 +69,7 @@ export default function Home({ gatewayUrl }) {
     fetch(`${gatewayUrl}/api/users/myself/games`, { method: 'POST', credentials: 'include' })
     .then(handleFetchResponse)
     .then(body => {
-      setState({ ...state, hostedGame: body });
+      getGames();
       setLastRes(body);
     })
     .catch(err => setLastRes(err));
@@ -80,7 +79,7 @@ export default function Home({ gatewayUrl }) {
     fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/state`, { method: 'PUT', credentials: 'include', body: '{ "state": "RUNNING" }' })
     .then(handleFetchResponse)
     .then(body => {
-      setState({ ...state, hostedGame: body });
+      getGames();
       setLastRes(body);
     })
     .catch(err => setLastRes(err));
@@ -96,7 +95,10 @@ export default function Home({ gatewayUrl }) {
   function registerFor(gamePin) {
     fetch(`${gatewayUrl}/api/lobby/${gamePin}/registration`, { method: 'POST', credentials: 'include', body: '' })
     .then(handleFetchResponse)
-    .then(body => setLastRes(body))
+    .then(body => {
+      getGames();
+      setLastRes(body);
+    })
     .catch(err => setLastRes(err));
   }
 
@@ -201,7 +203,6 @@ export default function Home({ gatewayUrl }) {
           <h2>State</h2>
           {renderStateDetails(state.userInfo, "userInfo")}
           {condRender(renderStateDetails(state.games, "games", renderGamesGrouped), gameEnabled)}
-          {condRender(renderStateDetails(state.hostedGame, "hostedGame"), gameEnabled)}
           {condRender(renderStateDetails(currentGame, "currentGame"), gameEnabled)}
           {condRender(renderStateDetails(currentMoves, "currentMoves", renderMoves), gameEnabled)}
           {renderState(lastRes, "lastRes")}
