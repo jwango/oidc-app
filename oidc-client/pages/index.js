@@ -22,6 +22,12 @@ export default function Home({ gatewayUrl }) {
     gameIdInput: ''
   };
 
+  const GAME_STATES = {
+    WAITING: 'WAITING',
+    RUNNING: 'RUNNING',
+    OVER: 'OVER'
+  };
+
   const [state, setState] = useState(initialState);
   const [currentGame, setCurrentGame] = useState({});
   const [currentMoves, setCurrentMoves] = useState([]);
@@ -79,6 +85,10 @@ export default function Home({ gatewayUrl }) {
     .then(handleFetchResponse)
     .then(body => {
       getGames();
+      if (body.id) {
+        getGameData(body.id);
+        getMoves(body.id);
+      }
       setLastRes(body);
     })
     .catch(err => setLastRes(err));
@@ -161,7 +171,16 @@ export default function Home({ gatewayUrl }) {
     if (!games) { return null; }    
     const gameElements = games.map(game => <li key={game.id}>
       {renderJson(game, false)}
-      <button onClick={() => { handleGameInput({ gameId: game.id, pin: game.pin }); } }>Select</button>
+      <button onClick={() => { 
+        handleGameInput({ gameId: game.id, pin: game.pin });
+        if (game.state != GAME_STATES.WAITING) {
+          getGameData(game.id);
+          getMoves(game.id);
+        } else {
+          setCurrentGame({});
+          setCurrentMoves([]);
+        }
+      } }>Select</button>
     </li>);
     return <ul>{gameElements}</ul>
   }
