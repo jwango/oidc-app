@@ -114,12 +114,8 @@ export default function Home({ gatewayUrl }) {
     .catch(err => setState({ ...state, lastErr: err }));
   }
 
-  function handleGameIdInput(input) {
-    setState({ ...state, gameIdInput: input });
-  }
-
-  function handleGamePinInput(input) {
-    setState({ ...state, gamePinInput: input });
+  function handleGameInput({ gameId = state.gameIdInput, pin = state.gamePinInput }) {
+    setState({ ...state, gameIdInput: gameId, gamePinInput: pin });
   }
 
   function handleMoveInput(input) {
@@ -143,7 +139,7 @@ export default function Home({ gatewayUrl }) {
     if (!games) { return null; }
     const gameElements = games.map(game => <li key={game.id}>
       {renderJson(game, false)}
-      <button onClick={() => { handleGameIdInput(game.id); handleGamePinInput(game.pin) } }>Select</button>
+      <button onClick={() => { handleGameInput({ gameId: game.id, pin: game.pin }); } }>Select</button>
     </li>)
     return <ul>{gameElements}</ul>
   }
@@ -191,11 +187,11 @@ export default function Home({ gatewayUrl }) {
         {condRender(
         <section className={styles["controls-container"]}>
           <label>Game Id:
-            <input type="text" value={state.gameIdInput} onChange={(event) => handleGameIdInput(event.target.value)}></input>
+            <input type="text" value={state.gameIdInput} onChange={(event) => handleGameInput({ gameId: event.target.value })}></input>
           </label>
           <button onClick={() => startGame(state.gameIdInput)}>Start Game!</button>
           <label>Game Pin:
-            <input type="text" value={state.gamePinInput} onChange={(event) => handleGamePinInput(event.target.value) }></input>
+            <input type="text" value={state.gamePinInput} onChange={(event) => handleGameInput({ pin: event.target.value }) }></input>
           </label>
           <button onClick={() => registerFor(state.gamePinInput)}>Register For Game</button>
         </section>,
