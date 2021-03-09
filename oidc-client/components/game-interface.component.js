@@ -20,8 +20,18 @@ export default function GameInterface({ gatewayUrl }) {
     OVER: 'OVER'
   };
 
+  const GAME_TYPES = {
+      TIC_TAC_TOE: 'TIC_TAC_TOE'
+  };
+
   const MESSAGE_TYPES = {
     MOVE_MADE: 'MOVE_MADE'
+  };
+
+  const ROW_TO_LETTER = {
+      0: "A",
+      1: "B",
+      2: "C"
   };
 
   const mPubNub = usePubNub();
@@ -184,10 +194,40 @@ export default function GameInterface({ gatewayUrl }) {
   function renderMoves(moves) {
     if (!moves) { return null; }
     const moveElements = moves.map((move, index) => <li key={index}>
-      {renderJson(move)}
+      {renderMove(move)}
       <button onClick={() =>  makeMove(state.gameIdInput, index)}>Make this move</button>
     </li>)
     return <ul>{moveElements}</ul>
+  }
+
+  function renderMove(move) {
+      if (move?.gameType === GAME_TYPES.TIC_TAC_TOE) {
+          return (
+            <span style={ { "margin-right": "16px" } }>[{ROW_TO_LETTER[move.moveInfo.row]}, {move.moveInfo.column}]</span>
+          );
+      } else {
+          return renderJson(move);
+      }
+  }
+
+  function renderGameData(gameData) {
+      if (gameData.type === GAME_TYPES.TIC_TAC_TOE && gameData.data) {
+          return renderTicTacToeGameData(gameData);
+      } else {
+          return renderJson(gameData);
+      }
+  }
+
+  function renderTicTacToeGameData(gameData) {
+    const board = gameData.data.board;
+    const winner = gameData.data.winner || "none";
+    const boardStr = " |0|1|2|\n--------\n" + board.map((row, i) => ROW_TO_LETTER[i] + "|" + row.map(cell => cell || " ").join("|") + "|").join("\n-------\n");
+    return (
+      <div>
+          <pre>{boardStr}</pre>
+          <label>winner? {winner}</label>
+      </div>
+    );
   }
 
   return (
@@ -197,7 +237,7 @@ export default function GameInterface({ gatewayUrl }) {
           <h2>State</h2>
           {renderStateDetails(messages, "messages")}
           {renderStateDetails(state.games, "games", renderGamesGrouped)}
-          {renderStateDetails(currentGame, "currentGame")}
+          {renderStateDetails(currentGame, "currentGame", renderGameData)}
           {renderStateDetails(currentMoves, "currentMoves", renderMoves)}
           {renderState(lastRes, "lastRes")}
         </section>
