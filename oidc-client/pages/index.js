@@ -42,9 +42,14 @@ export default function Home({ gatewayUrl }) {
     if (queryParams["loggedIn"] === "true") {
       getUserInfo().catch(err => {
         if (err.status == 404) {
-          setLastRes("Looks like you don't have an account! Create an account to proceed.")
+          setLastRes("Looks like you don't have an account! Create an account to proceed.");
         }
       });
+    } else if (queryParams["signIn"] != null) {
+      const attempts = +queryParams["signIn"];
+      if (!isNaN(attempts) && attempts < 4) {
+        signin();
+      }
     }
   }, [])
 
@@ -56,10 +61,19 @@ export default function Home({ gatewayUrl }) {
   const [lastRes, setLastRes] = useState({});
   const [pubNub, setPubNub] = useState(null);
 
+  function handleSigninButton() {
+    window.location.replace(setQueryParams(window.location.href, { "signIn": "1" }));
+  }
+
   function signin() {
     getUserInfo().catch(err => {
-      if (err.status == 401) {
+      console.log(err);
+      if (err.status === 401) {
         login();
+      } else if (err.status === 404) {
+        const queryParams = getQueryParams(window.location.href);
+        const attempts = +(queryParams["signIn"] || 0) + 1;
+        logout({ "signIn": `${attempts}` });
       }
     });
   }
@@ -73,13 +87,13 @@ export default function Home({ gatewayUrl }) {
     window.location.replace(newUrl);
   }
 
-  function logout() {
-    fetch(`${gatewayUrl}/logout`, { credentials: 'include' })
+  function logout(queryParams = {}) {
+    return fetch(`${gatewayUrl}/logout`, { credentials: 'include' })
       .then(res => handleFetchResponse(res, false))
       .then(() => {
         setState({ ...initialState });
         setLastRes("Logged out");
-        window.location.replace(setQueryParams(window.location.href, {}));
+        window.location.replace(setQueryParams(window.location.href, queryParams));
       })
       .catch(err => setLastRes(err));
   }
@@ -152,7 +166,7 @@ export default function Home({ gatewayUrl }) {
             {renderState(lastRes, "lastRes")}
           </section>
           <section className={styles["controls-container"]}>
-            <button onClick={signin}>Sign-in with Google</button>
+            <button onClick={handleSigninButton}>Sign-in with Google</button>
             <button onClick={createUser}>Create Account</button>
             <button onClick={logout}>Logout</button>
           </section>
