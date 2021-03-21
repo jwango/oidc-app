@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePubNub } from 'pubnub-react';
 import { renderJson, renderState, renderStateDetails } from '../utils'
 
-export default function GameInterface({ gatewayUrl }) {
+export default function GameInterface({ gatewayUrl, errHandler }) {
 
   const gameEnabled = true;
 
@@ -69,7 +69,7 @@ export default function GameInterface({ gatewayUrl }) {
       setState({ ...state, games: body });
       setLastRes(body);
     })
-    .catch(err => setLastRes(err));
+    .catch(err => handleErr(err));
   }
 
   function createGame() {
@@ -79,7 +79,7 @@ export default function GameInterface({ gatewayUrl }) {
       getGames();
       setLastRes(body);
     })
-    .catch(err => setLastRes(err));
+    .catch(err => handleErr(err));
   }
 
   function startGame(gameId) {
@@ -94,7 +94,7 @@ export default function GameInterface({ gatewayUrl }) {
       }
       setLastRes(body);
     })
-    .catch(err => setLastRes(err));
+    .catch(err => handleErr(err));
   }
 
   function registerFor(gamePin) {
@@ -104,7 +104,7 @@ export default function GameInterface({ gatewayUrl }) {
       getGames();
       setLastRes(body);
     })
-    .catch(err => setLastRes(err));
+    .catch(err => handleErr(err));
   }
 
   function getGameData(gameId) {
@@ -114,7 +114,7 @@ export default function GameInterface({ gatewayUrl }) {
       setCurrentGame(body);
       setLastRes(body);
     })
-    .catch(err => setLastRes(err));
+    .catch(err => handleErr(err));
   }
 
   function getMoves(gameId) {
@@ -124,7 +124,7 @@ export default function GameInterface({ gatewayUrl }) {
       setCurrentMoves(body);
       setLastRes(body);
     })
-    .catch(err => setLastRes(err));
+    .catch(err => handleErr(err));
   }
 
   function makeMove(gameId, moveIndex) {
@@ -135,7 +135,7 @@ export default function GameInterface({ gatewayUrl }) {
       getMoves(gameId);
       setLastRes("Move accepted.")
     })
-    .catch(err => setLastRes(err));
+    .catch(err => handleErr(err));
   }
 
   function handleGameInput({ gameId = state.gameIdInput, pin = state.gamePinInput }) {
@@ -152,6 +152,11 @@ export default function GameInterface({ gatewayUrl }) {
     } else {
       throw { status: res.status, statusText: res.statusText, body: res.text() };
     }
+  }
+
+  function handleErr(err) {
+    errHandler(err);
+    setLastRes(err);
   }
 
   function renderGamesGrouped(games) {

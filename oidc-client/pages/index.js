@@ -2,7 +2,7 @@ import styles from '../styles/Home.module.css'
 import fetch from 'isomorphic-fetch'
 import Head from 'next/head';
 import GameInterface from '../components/game-interface.component';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { renderState, renderStateDetails } from '../utils'
 import PubNub, { generateUUID } from 'pubnub';
 import { PubNubProvider } from 'pubnub-react';
@@ -17,6 +17,37 @@ export async function getStaticProps() {
 
 export default function Home({ gatewayUrl }) {
 
+  function getQueryParams(url) {
+    const queryParams = (window.location.href.split("?")[1] || "").split("#")[0].split("&").reduce((acc, val) => {
+      const mapping = val.split("=");
+      if (mapping.length == 2) { acc[mapping[0]] = mapping[1]; }
+      return acc;
+    }, {});
+    return queryParams;
+  }
+
+  function setQueryParams(url, paramsMap) {
+    const baseUrl = url.split("?")[0];
+    const queriesUri = Object.keys(paramsMap).reduce((acc, queryKey) => {
+      if (!paramsMap[queryKey]) { return acc; }
+      return [...acc, queryKey + "=" + paramsMap[queryKey]];
+    }, []);
+    if (queriesUri.length > 0) { return baseUrl + "?" + queriesUri.join("&"); }
+    return baseUrl;
+  }
+
+  useEffect(() => {
+    const queryParams = getQueryParams(window.location.href);
+
+    if (queryParams["loggedIn"] === "true") {
+      getUserInfo().catch(err => {
+        if (err.status == 404) {
+          setLastRes("Looks like you don't have an account! Create an account to proceed.")
+        }
+      });
+    }
+  }, [])
+
   const initialState ={
     userInfo: null
   };
@@ -25,8 +56,18 @@ export default function Home({ gatewayUrl }) {
   const [lastRes, setLastRes] = useState({});
   const [pubNub, setPubNub] = useState(null);
 
+  function signin() {
+    getUserInfo().catch(err => {
+      if (err.status == 401) {
+        login();
+      }
+    });
+  }
+
   function login() {
-    const userState = encodeURIComponent(window.location.href);
+    const queryParams = getQueryParams(window.location.href);
+    const newHref = setQueryParams(window.location.href, { ...queryParams, "loggedIn": "true" });
+    const userState = encodeURIComponent(newHref);
     const newUrl = `${gatewayUrl}/login?state=${userState}`;
     console.log(`redirect to ${newUrl}`);
     window.location.replace(newUrl);
@@ -38,12 +79,13 @@ export default function Home({ gatewayUrl }) {
       .then(() => {
         setState({ ...initialState });
         setLastRes("Logged out");
+        window.location.replace(setQueryParams(window.location.href, {}));
       })
       .catch(err => setLastRes(err));
   }
 
   function getUserInfo() {
-    fetch(`${gatewayUrl}/api/users/myself`, { credentials: 'include' })
+    return fetch(`${gatewayUrl}/api/users/myself`, { credentials: 'include' })
       .then(handleFetchResponse)
       .then(body => {
         if (!state.userInfo && body.id) {
@@ -56,13 +98,16 @@ export default function Home({ gatewayUrl }) {
         setState({ ...state, userInfo: body });
         setLastRes(body);
       })
-      .catch(err => setLastRes(err));
+      .catch(err => { setLastRes(err); throw err });
   }
 
   function createUser() {
     fetch(`${gatewayUrl}/api/users`, { method: 'POST', credentials: 'include' })
     .then(handleFetchResponse)
-    .then(body => setLastRes(body))
+    .then(body => {
+      getUserInfo();
+      setLastRes(body);
+    })
     .catch(err => setLastRes(err));
   }
 
@@ -78,7 +123,14 @@ export default function Home({ gatewayUrl }) {
     }
   }
 
+  function errHandler(err) {
+    if (err.status == 401) {
+      logout();
+    }
+  }
+
   function renderContent() {
+    const self = this;
     if (state.userInfo && pubNub) {
       return (
         <main className={styles.main}>
@@ -86,7 +138,7 @@ export default function Home({ gatewayUrl }) {
             <button onClick={logout}>Logout</button>
           </section>
           <PubNubProvider client={pubNub}>
-            <GameInterface gatewayUrl={gatewayUrl}></GameInterface>
+            <GameInterface gatewayUrl={gatewayUrl} errHandler={errHandler}></GameInterface>
           </PubNubProvider>
         </main>
       )
@@ -100,9 +152,8 @@ export default function Home({ gatewayUrl }) {
             {renderState(lastRes, "lastRes")}
           </section>
           <section className={styles["controls-container"]}>
-            <button onClick={login}>Sign-in with Google</button>
+            <button onClick={signin}>Sign-in with Google</button>
             <button onClick={createUser}>Create Account</button>
-            <button onClick={getUserInfo}>Login</button>
             <button onClick={logout}>Logout</button>
           </section>
         </main>
