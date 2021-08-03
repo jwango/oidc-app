@@ -58,7 +58,7 @@ export default function Home({ gatewayUrl }) {
     userInfo: null
   };
 
-  const [currentGameId, setCurrentGameId] = useState({});
+  const [currentGameId, setCurrentGameId] = useState(null);
   const [state, setState] = useState(initialState);
   const [lastRes, setLastRes] = useState({});
   const [pubNub, setPubNub] = useState(null);
@@ -153,10 +153,11 @@ export default function Home({ gatewayUrl }) {
           <section className={styles["controls-container"]}>
             <button onClick={logout}>Logout</button>
           </section>
-          <LobbyInterface gatewayUrl={gatewayUrl} errHandler={errHandler} setCurrentGameId={setCurrentGameId}></LobbyInterface>
-          {/* <PubNubProvider client={pubNub}>
-            <GameInterface gatewayUrl={gatewayUrl} errHandler={errHandler}></GameInterface>
-          </PubNubProvider> */}
+          {
+            !!currentGameId
+              ? <PubNubProvider client={pubNub}><GameInterface gatewayUrl={gatewayUrl} errHandler={errHandler} gameId={currentGameId} backFn={() => setCurrentGameId(null)}></GameInterface></PubNubProvider>
+              : <LobbyInterface gatewayUrl={gatewayUrl} errHandler={errHandler} setCurrentGameId={setCurrentGameId}></LobbyInterface>
+          }
         </main>
       )
     } else {

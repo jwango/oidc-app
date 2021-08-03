@@ -1,6 +1,6 @@
 import styles from '../styles/Game.module.css'  
 import fetch from 'isomorphic-fetch'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameId }) {
 
@@ -23,6 +23,10 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
 
   const [state, setState] = useState(initialState);
   const [lastRes, setLastRes] = useState({});
+
+  useEffect(() => {
+    getGames();
+  }, [gatewayUrl])
 
   function getGames() {
     fetch(`${gatewayUrl}/api/users/myself/games`, { credentials: 'include' })

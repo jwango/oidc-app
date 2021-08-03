@@ -2,25 +2,10 @@ import styles from '../styles/Game.module.css'
 import fetch from 'isomorphic-fetch'
 import { useEffect, useState } from 'react';
 import { usePubNub } from 'pubnub-react';
-import { renderJson, renderState, renderStateDetails } from '../utils'
+import { renderJson, renderStateDetails } from '../utils'
 import Mahjong from './mahjong.component';
 
-export default function GameInterface({ gatewayUrl, errHandler }) {
-
-  const gameEnabled = true;
-
-  const initialState = {
-    games: [],
-    gamePinInput: '',
-    gameIdInput: ''
-  };
-
-  const GAME_STATES = {
-    WAITING: 'WAITING',
-    RUNNING: 'RUNNING',
-    OVER: 'OVER'
-  };
-
+export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }) {
   const GAME_TYPES = {
       TIC_TAC_TOE: 'TIC_TAC_TOE',
       MAHJONG: 'MAHJONG'
@@ -45,8 +30,8 @@ export default function GameInterface({ gatewayUrl, errHandler }) {
     const message = event.message;
     setMessages([...messages, event]);
     if (message.type == MESSAGE_TYPES.MOVE_MADE) {
-      getGameData(state.gameIdInput);
-      getMoves(state.gameIdInput);
+      getGameData(gameId);
+      getMoves(gameId);
     }
   }
 
@@ -59,55 +44,15 @@ export default function GameInterface({ gatewayUrl, errHandler }) {
     }
   }, [mPubNub, channels]);
 
-  const [state, setState] = useState(initialState);
   const [currentGame, setCurrentGame] = useState({});
   const [currentMoves, setCurrentMoves] = useState([]);
   const [lastRes, setLastRes] = useState({});
 
-  function getGames() {
-    fetch(`${gatewayUrl}/api/users/myself/games`, { credentials: 'include' })
-    .then(handleFetchResponse)
-    .then(body => {
-      setState({ ...state, games: body });
-      setLastRes(body);
-    })
-    .catch(err => handleErr(err));
-  }
-
-  function createGame() {
-    fetch(`${gatewayUrl}/api/users/myself/games`, { method: 'POST', credentials: 'include' })
-    .then(handleFetchResponse)
-    .then(body => {
-      getGames();
-      setLastRes(body);
-    })
-    .catch(err => handleErr(err));
-  }
-
-  function startGame(gameId) {
-    fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/state`, { method: 'PUT', credentials: 'include', body: '{ "state": "RUNNING" }' })
-    .then(handleFetchResponse)
-    .then(body => {
-      getGames();
-      if (body.id) {
-        getGameData(body.id);
-        getMoves(body.id);
-        setChannels((new Set(channels)).add(body.id));
-      }
-      setLastRes(body);
-    })
-    .catch(err => handleErr(err));
-  }
-
-  function registerFor(gamePin) {
-    fetch(`${gatewayUrl}/api/lobby/${gamePin}/registration`, { method: 'POST', credentials: 'include', body: '' })
-    .then(handleFetchResponse)
-    .then(body => {
-      getGames();
-      setLastRes(body);
-    })
-    .catch(err => handleErr(err));
-  }
+  useEffect(() => { 
+    getGameData(gameId);
+    getMoves(gameId);
+    setChannels((new Set(channels)).add(gameId));
+  }, [gameId])
 
   function getGameData(gameId) {
     fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/data`, { credentials: 'include' })
@@ -144,10 +89,6 @@ export default function GameInterface({ gatewayUrl, errHandler }) {
     .catch(err => handleErr(err));
   }
 
-  function handleGameInput({ gameId = state.gameIdInput, pin = state.gamePinInput }) {
-    setState({ ...state, gameIdInput: gameId || "", gamePinInput: pin || "" });
-  }
-
   function handleFetchResponse(res, useJson = true) {
     if (res.ok) {
       if (useJson) {
@@ -164,49 +105,12 @@ export default function GameInterface({ gatewayUrl, errHandler }) {
     errHandler(err);
     setLastRes(err);
   }
-
-  function renderGamesGrouped(games) {
-     if (!games) { return null; }
-     const gameMap = groupGamesByStatus(games);
-     const gameGroupElements = Object.keys(gameMap).map(gameState => <li key={gameState}>
-       {renderStateDetails(gameMap[gameState], gameState, renderGames)}
-     </li>);
-    return <ul>{gameGroupElements}</ul>
-  }
-
-  function renderGames(games) {
-    if (!games) { return null; }    
-    const gameElements = games.map(game => <li key={game.id}>
-      {renderJson(game, false)}
-      <button onClick={() => { 
-        handleGameInput({ gameId: game.id, pin: game.pin });
-        if (game.state != GAME_STATES.WAITING) {
-          getGameData(game.id);
-          getMoves(game.id);
-          setChannels((new Set(channels)).add(game.id));
-        } else {
-          setCurrentGame({});
-          setCurrentMoves([]);
-        }
-      } }>Select</button>
-    </li>);
-    return <ul>{gameElements}</ul>
-  }
-
-  function groupGamesByStatus(games) {
-    const gameMap = {};
-    games.forEach(game => {
-      if (!gameMap[game.state]) { gameMap[game.state] = []; }
-      gameMap[game.state].push(game);
-    });
-    return gameMap;
-  }
   
   function renderMoves(moves) {
     if (!moves) { return null; }
     const moveElements = moves.map((move, index) => <li key={index}>
       {renderMove(move)}
-      <button onClick={() => makeMoveByIndex(state.gameIdInput, index)}>Make this move</button>
+      <button onClick={() => makeMoveByIndex(gameId, index)}>Make this move</button>
     </li>)
     return <ul>{moveElements}</ul>
   }
@@ -231,11 +135,11 @@ export default function GameInterface({ gatewayUrl, errHandler }) {
 
   function renderGame(gameDataAndMoves) {
     if (gameDataAndMoves.gameData.type == GAME_TYPES.MAHJONG) {
-     return <Mahjong gameData={gameDataAndMoves.gameData} moves={gameDataAndMoves.moves} submitMoveFn={(move) => makeMove(state.gameIdInput, move)}></Mahjong>
+     return <Mahjong gameData={gameDataAndMoves.gameData} moves={gameDataAndMoves.moves} submitMoveFn={(move) => makeMove(gameId, move)}></Mahjong>
     } else {
       return <div>
         {renderGameData(gameDataAndMoves.gameData)}
-        {renderMove(gameDataAndMoves.moves)}
+        {renderMoves(gameDataAndMoves.moves)}
       </div>
     }
   }
@@ -254,31 +158,15 @@ export default function GameInterface({ gatewayUrl, errHandler }) {
 
   return (
     <section style={ { "width": "100%" } }>
-        <h1>{gameEnabled ? "Game Interface" : "User Interface" }</h1>
+        <h1>{ "Game Interface" }</h1>
         <section className={styles["state-container"]}>
-          <h2>State</h2>
-          {renderStateDetails(messages, "messages")}
-          {renderStateDetails(state.games, "games", renderGamesGrouped)}
-          {renderStateDetails({ gameData: currentGame, moves: currentMoves }, "currentGame", renderGame)}
-          {renderState(lastRes, "lastRes")}
+          {/*renderStateDetails(messages, "messages")*/}
+          {renderGame({ gameData: currentGame, moves: currentMoves })}
         </section>
         <section className={styles["controls-container"]}>
-        <button onClick={getGames}>Get Games</button>
-        <button onClick={createGame}>Create Game</button>
-        </section>
-        <section className={styles["controls-container"]}>
-          <label>Game Id:
-            <input type="text" value={state.gameIdInput} onChange={(event) => handleGameInput({ gameId: event.target.value })}></input>
-          </label>
-          <button onClick={() => startGame(state.gameIdInput)}>Start Game!</button>
-          <label>Game Pin:
-            <input type="text" value={state.gamePinInput} onChange={(event) => handleGameInput({ pin: event.target.value }) }></input>
-          </label>
-          <button onClick={() => registerFor(state.gamePinInput)}>Register For Game</button>
-        </section>
-        <section className={styles["controls-container"]}>
-          <button onClick={() => getGameData(state.gameIdInput)}>Get Game Data</button>
-          <button onClick={() => getMoves(state.gameIdInput)}>Get Moves</button>
+          <button onClick={() => getGameData(gameId)}>Get Game Data</button>
+          <button onClick={() => getMoves(gameId)}>Get Moves</button>
+          <button onClick={() => backFn()}>Back to Lobby</button>
         </section>
     </section>
   )
