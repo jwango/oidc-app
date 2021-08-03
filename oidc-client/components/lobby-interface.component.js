@@ -18,7 +18,8 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
   const initialState = {
     games: [],
     gamePinInput: '',
-    createGameType: GAME_TYPES.TIC_TAC_TOE
+    createGameType: GAME_TYPES.TIC_TAC_TOE,
+    activeOnly: true
   };
 
   const [state, setState] = useState(initialState);
@@ -93,13 +94,14 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
   function renderGamesTable(games) {
     if (!games) { return null; }
     const gameRows = games
+        .filter((game) => !!state.activeOnly ? game.state !== GAME_STATES.OVER : true)
         .sort((a, b) => a.state.localeCompare(b.state))
         .map(game => {
             let action = <td></td>;
             if (game.state === GAME_STATES.WAITING) {
                 action = <td><button onClick={() => startGame(game.id)}>Start</button></td>
-            } else if (game.state === GAME_STATES.RUNNING) {
-                action = <td><button onClick={() => setCurrentGameId(game.id)}>Go to</button></td>
+            } else  {
+                action = <td><button onClick={() => setCurrentGameId(game.id)}>Enter</button></td>
             }
             return <tr key={game.id}>
                 <td>{game.type}</td>
@@ -137,6 +139,8 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
         <h1>Lobby</h1>
         <section className={styles["state-container"]}>
           <h2>Games</h2>
+          <input type="checkbox" id="activeGame" name="activeOnly" checked={state.activeOnly} onChange={() => setState({ ...state, activeOnly: !state.activeOnly })}></input>
+          <label for="activeOnly">Show Active Only</label>
           {renderGamesTable(state.games)}
         </section>
         <section className={styles["controls-container"]}>
