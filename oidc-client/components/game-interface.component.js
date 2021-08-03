@@ -3,6 +3,7 @@ import fetch from 'isomorphic-fetch'
 import { useEffect, useState } from 'react';
 import { usePubNub } from 'pubnub-react';
 import { renderJson, renderState, renderStateDetails } from '../utils'
+import Mahjong from './mahjong.component';
 
 export default function GameInterface({ gatewayUrl, errHandler }) {
 
@@ -21,7 +22,8 @@ export default function GameInterface({ gatewayUrl, errHandler }) {
   };
 
   const GAME_TYPES = {
-      TIC_TAC_TOE: 'TIC_TAC_TOE'
+      TIC_TAC_TOE: 'TIC_TAC_TOE',
+      MAHJONG: 'MAHJONG'
   };
 
   const MESSAGE_TYPES = {
@@ -127,8 +129,12 @@ export default function GameInterface({ gatewayUrl, errHandler }) {
     .catch(err => handleErr(err));
   }
 
-  function makeMove(gameId, moveIndex) {
-    fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/moves`, { method: 'POST', credentials: 'include', body: JSON.stringify(currentMoves[moveIndex]) })
+  function makeMoveByIndex(gameId, moveIndex) {
+    return makeMove(gameId, currentMoves[moveIndex])
+  }
+
+  function makeMove(gameId, move) {
+    fetch(`${gatewayUrl}/api/users/myself/games/${gameId}/moves`, { method: 'POST', credentials: 'include', body: JSON.stringify(move) })
     .then(res => handleFetchResponse(res, false))
     .then(body => {
       getGameData(gameId);
@@ -200,7 +206,7 @@ export default function GameInterface({ gatewayUrl, errHandler }) {
     if (!moves) { return null; }
     const moveElements = moves.map((move, index) => <li key={index}>
       {renderMove(move)}
-      <button onClick={() =>  makeMove(state.gameIdInput, index)}>Make this move</button>
+      <button onClick={() => makeMoveByIndex(state.gameIdInput, index)}>Make this move</button>
     </li>)
     return <ul>{moveElements}</ul>
   }
@@ -223,6 +229,17 @@ export default function GameInterface({ gatewayUrl, errHandler }) {
       }
   }
 
+  function renderGame(gameDataAndMoves) {
+    if (gameDataAndMoves.gameData.type == GAME_TYPES.MAHJONG) {
+     return <Mahjong gameData={gameDataAndMoves.gameData} moves={gameDataAndMoves.moves} submitMoveFn={(move) => makeMove(state.gameIdInput, move)}></Mahjong>
+    } else {
+      return <div>
+        {renderGameData(gameDataAndMoves.gameData)}
+        {renderMove(gameDataAndMoves.moves)}
+      </div>
+    }
+  }
+
   function renderTicTacToeGameData(gameData) {
     const board = gameData.data.board;
     const winner = gameData.data.winner || "none";
@@ -242,8 +259,7 @@ export default function GameInterface({ gatewayUrl, errHandler }) {
           <h2>State</h2>
           {renderStateDetails(messages, "messages")}
           {renderStateDetails(state.games, "games", renderGamesGrouped)}
-          {renderStateDetails(currentGame, "currentGame", renderGameData)}
-          {renderStateDetails(currentMoves, "currentMoves", renderMoves)}
+          {renderStateDetails({ gameData: currentGame, moves: currentMoves }, "currentGame", renderGame)}
           {renderState(lastRes, "lastRes")}
         </section>
         <section className={styles["controls-container"]}>

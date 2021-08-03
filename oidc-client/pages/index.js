@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { renderState, renderStateDetails } from '../utils'
 import PubNub, { generateUUID } from 'pubnub';
 import { PubNubProvider } from 'pubnub-react';
+import LobbyInterface from '../components/lobby-interface.component';
 
 export async function getStaticProps() {
   return {
@@ -57,6 +58,7 @@ export default function Home({ gatewayUrl }) {
     userInfo: null
   };
 
+  const [currentGameId, setCurrentGameId] = useState({});
   const [state, setState] = useState(initialState);
   const [lastRes, setLastRes] = useState({});
   const [pubNub, setPubNub] = useState(null);
@@ -151,9 +153,10 @@ export default function Home({ gatewayUrl }) {
           <section className={styles["controls-container"]}>
             <button onClick={logout}>Logout</button>
           </section>
-          <PubNubProvider client={pubNub}>
+          <LobbyInterface gatewayUrl={gatewayUrl} errHandler={errHandler} setCurrentGameId={setCurrentGameId}></LobbyInterface>
+          {/* <PubNubProvider client={pubNub}>
             <GameInterface gatewayUrl={gatewayUrl} errHandler={errHandler}></GameInterface>
-          </PubNubProvider>
+          </PubNubProvider> */}
         </main>
       )
     } else {

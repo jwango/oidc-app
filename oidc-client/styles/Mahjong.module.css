@@ -1,0 +1,30 @@
+.player__hand {
+    margin: 0px;
+    padding-left: 15px;
+}
+
+.player__tile {
+    list-style: none;
+    display: inline-block;
+}
+
+.grouping {
+    margin: 0px;
+    padding-left: 15px;
+    display: inline-block;
+}
+
+.hand__tile-image:hover {
+    filter: brightness(1.1)
+}
+
+.hand__tile-image--unselected {
+    filter: brightness(1);
+    border-style: none;
+}
+
+.hand__tile-image--selected {
+    border-color: blue;
+    border-width: 2 px;
+    border-style: solid;
+}
