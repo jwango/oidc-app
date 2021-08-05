@@ -104,6 +104,7 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
                 action = <td><button onClick={() => setCurrentGameId(game.id)}>Enter</button></td>
             }
             return <tr key={game.id}>
+                <td>{game.name || ""}</td>
                 <td>{game.type}</td>
                 <td>{game.state}</td>
                 <td>{game.playerIds?.length}</td>
@@ -114,9 +115,10 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
     return <table>
         <thead>
             <tr>
+                <th>Name</th>
                 <th>Type</th>
                 <th>State</th>
-                <th>Players</th>
+                <th></th>
                 <th>PIN</th>
                 <th>Action</th>
             </tr>

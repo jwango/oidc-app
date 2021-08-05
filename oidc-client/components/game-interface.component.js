@@ -6,6 +6,9 @@ import { renderJson, renderStateDetails } from '../utils'
 import Mahjong from './mahjong.component';
 
 export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }) {
+
+  const adminSecret = "secret"
+
   const GAME_TYPES = {
       TIC_TAC_TOE: 'TIC_TAC_TOE',
       MAHJONG: 'MAHJONG'
@@ -44,8 +47,9 @@ export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }
     }
   }, [mPubNub, channels]);
 
+  const [getURL, setGetURL] = useState("");
   const [currentGame, setCurrentGame] = useState({});
-  const [currentMoves, setCurrentMoves] = useState([]);
+  const [currentMoves, setCurrentMoves] = useState({ pendingMove: null, moves: [] });
   const [lastRes, setLastRes] = useState({});
 
   useEffect(() => { 
@@ -75,7 +79,7 @@ export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }
   }
 
   function makeMoveByIndex(gameId, moveIndex) {
-    return makeMove(gameId, currentMoves[moveIndex])
+    return makeMove(gameId, currentMoves.moves[moveIndex])
   }
 
   function makeMove(gameId, move) {
@@ -135,11 +139,11 @@ export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }
 
   function renderGame(gameDataAndMoves) {
     if (gameDataAndMoves.gameData.type == GAME_TYPES.MAHJONG) {
-     return <Mahjong gameData={gameDataAndMoves.gameData} moves={gameDataAndMoves.moves} submitMoveFn={(move) => makeMove(gameId, move)}></Mahjong>
+     return <Mahjong gameData={gameDataAndMoves.gameData} movesInfo={gameDataAndMoves.movesInfo} submitMoveFn={(move) => makeMove(gameId, move)}></Mahjong>
     } else {
       return <div>
         {renderGameData(gameDataAndMoves.gameData)}
-        {renderMoves(gameDataAndMoves.moves)}
+        {renderMoves(gameDataAndMoves.movesInfo.moves)}
       </div>
     }
   }
@@ -156,18 +160,35 @@ export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }
     );
   }
 
+  function makeRequest(url) {
+    const reqBody = encodeURIComponent("ADMIN-SECRET") + "=" + encodeURIComponent(adminSecret);
+    fetch(`${gatewayUrl}/${url}`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }, body: reqBody })
+    .then(handleFetchResponse)
+    .then(body => {
+      setLastRes(body);
+    })
+    .catch(err => setLastRes(err));
+  }
+
   return (
     <section style={ { "width": "100%" } }>
         <h1>{ "Game Interface" }</h1>
         <section className={styles["state-container"]}>
           {/*renderStateDetails(messages, "messages")*/}
-          {renderGame({ gameData: currentGame, moves: currentMoves })}
+          {renderGame({ gameData: currentGame, movesInfo: currentMoves })}
         </section>
         <section className={styles["controls-container"]}>
           <button onClick={() => getGameData(gameId)}>Get Game Data</button>
           <button onClick={() => getMoves(gameId)}>Get Moves</button>
           <button onClick={() => backFn()}>Back to Lobby</button>
         </section>
+        {/* <section className={styles["controls-container"]}>
+          <input type="text" value={getURL} onChange={(event) => setGetURL(event.target.value)}></input>
+          <button onClick={() => makeRequest(getURL)}>REQUEST</button>
+        </section>
+        <section className={styles["state-container"]}>
+          {renderJson(lastRes)}
+        </section> */}
     </section>
   )
 }

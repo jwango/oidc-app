@@ -1,7 +1,7 @@
 import styles from '../styles/Mahjong.module.css'  
 import { useEffect, useRef, useState } from "react"
 
-export default function Mahjong({ gameData, moves, submitMoveFn }) {
+export default function Mahjong({ gameData, movesInfo, submitMoveFn }) {
     const tileWidth = 40
     const tileHeight = 60
     const tileImagePath = "assets/mahjong/tiles"
@@ -49,13 +49,15 @@ export default function Mahjong({ gameData, moves, submitMoveFn }) {
         return <ul className={styles["grouping"]} key={key}>{ tileElements }</ul>
     }
 
-    function renderMoves(moves) {
+    function renderMoves(movesInfo) {
+        const pendingMove = movesInfo?.pendingMove?.moveInfo
+        const moves = movesInfo?.moves || []
         const playMoves = moves.filter(move => move.gameType == "MAHJONG" && move.moveInfo.moveType == "PLAY")
         const actions = moves
             .filter(move => move.gameType == "MAHJONG" && move.moveInfo.moveType != "PLAY")
             .map(move => {
                 const moveText = (move.moveInfo.moveType == "EAT") ? `EAT with ${move.moveInfo.groupWith}` : move.moveInfo.moveType;
-                return <button key={moveText} onClick={() => submitMoveFn(move)}>{moveText}</button>
+                return <button key={moveText} onClick={() => submitMoveFn(move)} disabled={!!pendingMove}>{moveText}</button>
             })
         if (selectedHandTile != null) {
             const selectedMove = playMoves.find(playMove => playMove.moveInfo.tile == selectedHandTile.tile)
@@ -72,6 +74,9 @@ export default function Mahjong({ gameData, moves, submitMoveFn }) {
             }
         } else if (playMoves.length > 0) {
             actions.push(<p key="prompt">Or select a tile to play</p>)
+        }
+        if (pendingMove != null) {
+            actions.push(<p key="pendingMove">System is still processing your last move request: {movesInfo.pendingMove.moveInfo.moveType} {movesInfo.pendingMove.moveInfo.tile}</p>)
         }
         return (<section><h3>Moves</h3>{actions}</section>)
     }
@@ -91,7 +96,7 @@ export default function Mahjong({ gameData, moves, submitMoveFn }) {
                 setSelectedHandTile({ tile: lastMove.tile, index })
             }
         }
-    }, [moves, gameData])
+    }, [movesInfo, gameData])
    
     return (<div>
         <section>
@@ -111,6 +116,6 @@ export default function Mahjong({ gameData, moves, submitMoveFn }) {
             <h3>Flowers</h3>
             { renderGrouping(gameData?.playerData?.flowers || [], "flowers") }
         </section>
-        { renderMoves(moves || []) }
+        { renderMoves(movesInfo) }
     </div>)
 }
