@@ -1,15 +1,20 @@
 import styles from '../styles/Mahjong.module.css'  
-import { useEffect, useRef, useState } from "react"
+import { Fragment, useEffect, createRef, useState } from "react"
 
 export default function Mahjong({ gameData, movesInfo, submitMoveFn }) {
     const tileWidth = 40
     const tileHeight = 60
     const tileImagePath = "assets/mahjong/tiles"
+    const playerId = gameData?.playerData?.id
 
     const [selectedHandTile, setSelectedHandTile] = useState(null)
+    const [playerIdShown, setPlayerIdShown] = useState(playerId)
+    const moveContainerRef = createRef();
 
     function getTileFileName(tile) {
-        if (tile.startsWith("FLOWER")) {
+        if (!tile) {
+            return "HIDDEN.png"
+        } else if (tile.startsWith("FLOWER")) {
             return "FLOWER.png"
         } else {
             return tile + ".png"
@@ -40,13 +45,13 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn }) {
         return <ul className={styles["player__hand"]}>{ handTiles }</ul>
     }
 
-    function renderGrouping(tiles, key) {
+    function renderGrouping(tiles, key, styling = "grouping") {
         const tileElements = tiles.map((tile, index) => {
             return <li key={tile + index} className={styles["player__tile"]}>
                 <img src={tileImagePath + "/" + getTileFileName(tile)} alt={tile} width={tileWidth} height={tileHeight}></img>
             </li>
         })
-        return <ul className={styles["grouping"]} key={key}>{ tileElements }</ul>
+        return <ul className={styles[styling]} key={key}>{ tileElements }</ul>
     }
 
     function renderMoves(movesInfo) {
@@ -57,23 +62,32 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn }) {
             .filter(move => move.gameType == "MAHJONG" && move.moveInfo.moveType != "PLAY")
             .map(move => {
                 const moveText = (move.moveInfo.moveType == "EAT") ? `EAT with ${move.moveInfo.groupWith}` : move.moveInfo.moveType;
-                return <button key={moveText} onClick={() => submitMoveFn(move)} disabled={!!pendingMove}>{moveText}</button>
+                return <button
+                    key={moveText}
+                    onClick={() => { setSelectedHandTile(null); submitMoveFn(move)}}
+                    disabled={!!pendingMove}>
+                        {moveText}
+                </button>
             })
-        if (selectedHandTile != null) {
-            const selectedMove = playMoves.find(playMove => playMove.moveInfo.tile == selectedHandTile.tile)
-            if (!!selectedMove) {
-                actions.push(<button
-                    key={"Play"+selectedHandTile.tile}
-                    onClick={() => {
-                        setSelectedHandTile(null)
-                        submitMoveFn(selectedMove)
-                    }}
-                >
-                    Play {selectedHandTile.tile}
-                </button>)
-            }
+        const selectedMove = playMoves.find(playMove => !!selectedHandTile && playMove.moveInfo.tile == selectedHandTile.tile)
+        if (!!selectedMove) {
+            actions.push(<button
+                key={"Play"+selectedHandTile.tile}
+                onClick={() => {
+                    setSelectedHandTile(null)
+                    submitMoveFn(selectedMove)
+                }}
+            >
+                Play {selectedHandTile.tile}
+            </button>)
         } else if (playMoves.length > 0) {
+            if (selectedHandTile != null) {
+                setSelectedHandTile(null)
+            }
             actions.push(<p key="prompt">Or select a tile to play</p>)
+        }
+        if (moves.length === 0) {
+            actions.push(<p key="nomoves">Currently no moves for you to make</p>)
         }
         if (pendingMove != null) {
             actions.push(<p key="pendingMove">System is still processing your last move request: {movesInfo.pendingMove.moveInfo.moveType} {movesInfo.pendingMove.moveInfo.tile}</p>)
@@ -81,13 +95,59 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn }) {
         return (<section><h3>Moves</h3>{actions}</section>)
     }
 
-    const groupings = (gameData?.playerData?.groupings || []).map((grouping, i) => renderGrouping(grouping.tiles, i))
+    function renderPlayerData(playerData, myselfId) {
+        const silentGroupingsData = []
+        const isMyself = playerData?.id === myselfId
+        if (!isMyself) {
+            for (let i = 0; i < playerData?.silentGongCount || 0; i += 1) {
+                silentGroupingsData.push([null, null, null, null])
+            }
+        }
+        const playersGroupingsData = playerData?.groupings || []
+        const groupings = [...playersGroupingsData, ...silentGroupingsData].map((grouping, i) => renderGrouping(grouping.tiles, i))
+        const handRendering = isMyself ? renderHand(playerData?.hand || []) : renderGrouping(playerData?.hand || [], playerData?.id, "player__hand")
+        return (<section>
+            { handRendering }
+            <br></br>
+            { groupings }
+            { renderGrouping(playerData?.flowers || [], "flowers") }
+        </section>)
+    }
+
+    function renderPlayerOptions(gameData) {
+        const otherPlayersData = (gameData?.data?.otherPlayersData || []).map((p, i) => ({ id: p.id, name: p.name || `Other ${i + 1}` }))
+        const myId = gameData?.playerData?.id 
+        const data = [ { id: myId, name: "Myself" }, ...otherPlayersData ].filter((id) => !!id)
+        const options = data.map(data => {
+            return <option key={data.id} value={data.id} selected={playerIdShown === data.id}>{data.name}</option>
+        })
+        return <select id="activePlayer" name="activePlayer" onChange={(event) => setPlayerIdShown(event.target.value)}>{options}</select>
+    }
+
+    function renderLastMoves(gameData) {
+        const myId = gameData?.playerData?.id 
+        const nameMap = (gameData?.data?.otherPlayersData || []).reduce((acc, curr, i) => {
+            return { ...acc, [curr.id]: curr.name || `Other ${i + 1}` }
+        }, { [myId]: "You" })
+
+        const moves = (gameData?.data?.moves || []).map(move => {
+            const withText = !!(move.groupWith?.length) ? `with ${move.groupWith}` : "";
+            return <li><strong>{nameMap[move.playerId] || "???"}:</strong> {move.moveType} {move.tile || ""} {withText}</li>
+        })
+        return <ul className={styles["moves__container"]} ref={moveContainerRef}>{moves}</ul>
+    }
+
     const tilesOut = gameData?.data?.tilesOut || []
-    const tilesOut1 = [...tilesOut]
-    const lastTile = tilesOut1.pop()
-    const tilesOut2 = (!!lastTile)  ? [lastTile] : []
-    const playerId = gameData?.playerData?.id
     const lastMove = gameData?.data?.lastMove
+    const otherPlayersData = gameData?.data?.otherPlayersData || []
+
+    const playerRendering = (!playerIdShown || playerIdShown === playerId) ? (<Fragment>
+        {renderPlayerData(gameData?.playerData, playerId)}
+        {renderMoves(movesInfo)}
+    </Fragment>) : (<Fragment>
+        {renderPlayerData(otherPlayersData.find((otherData) => otherData.id === playerIdShown), playerId)}
+    </Fragment>)
+
 
     useEffect(() => {
         if (playerId != null && lastMove != null && lastMove.playerId == playerId && selectedHandTile == null) {
@@ -96,26 +156,28 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn }) {
                 setSelectedHandTile({ tile: lastMove.tile, index })
             }
         }
+        if (!!moveContainerRef.current) {
+            moveContainerRef.current.scrollTop = moveContainerRef.current.scrollHeight;
+        }
     }, [movesInfo, gameData])
    
-    return (<div>
-        <section>
-            <h3>Tiles Out ({ gameData?.data?.deckSize} left)</h3>
-            { renderGrouping(tilesOut1, "tiles1") }
-            { renderGrouping(tilesOut2, "tiles2") }
+    return (<section className={styles["mahjong__container"]}>
+        <section className={styles["mahjong__column"]}>
+            <section>
+                <h3>Tiles Out ({ gameData?.data?.deckSize} left)</h3>
+                { renderGrouping(tilesOut, "tilesOut") }
+            </section>
+            <section>
+                <h3>
+                    <label>Look at </label>
+                    {renderPlayerOptions(gameData)}
+                </h3>
+                {playerRendering}
+            </section>
         </section>
-        <section>
-            <h3>Hand</h3>
-            { renderHand(gameData?.playerData?.hand || []) }
+        <section className={styles["mahjong__column"]}>
+            <h3>Move History</h3>
+            {renderLastMoves(gameData)}
         </section>
-        <section>
-            <h3>Groupings</h3>
-            { groupings }
-        </section>
-        <section>
-            <h3>Flowers</h3>
-            { renderGrouping(gameData?.playerData?.flowers || [], "flowers") }
-        </section>
-        { renderMoves(movesInfo) }
-    </div>)
+    </section>)
 }

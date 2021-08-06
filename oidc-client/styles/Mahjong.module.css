@@ -28,3 +28,27 @@
     border-width: 2 px;
     border-style: solid;
 }
+
+.moves__container {
+    overflow-y: scroll;
+    max-height: 200px;
+    width: 100%;
+    border-style: solid;
+    border-color: darkgrey;
+    padding: 20px;
+    min-width: 300px;
+}
+
+.moves__container > li {
+    list-style: none;
+}
+
+.mahjong__container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.mahjong__column {
+    max-width: 500px;
+}
