@@ -153,6 +153,7 @@ app.get('/auth_handler', async (req, res, next) => {
     await savePromise;
 
     // verify the token
+    if (DEBUG_OIDC) { console.log(tokenState.access_token); }
     const decoded = await AuthClient.verifyToken(tokenState.id_token, nonceToCheck);
 
     // correlate the token to the user session
