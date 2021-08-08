@@ -1,7 +1,8 @@
+import sharedStyles from '../styles/Shared.module.css'  
 import styles from '../styles/Mahjong.module.css'  
 import { Fragment, useEffect, createRef, useState } from "react"
 
-export default function Mahjong({ gameData, movesInfo, submitMoveFn }) {
+export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn, backFn }) {
     const tileWidth = 40
     const tileHeight = 60
     const tileImagePath = "assets/mahjong/tiles"
@@ -183,6 +184,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn }) {
    
     return (<section className={styles["mahjong__container"]}>
         <section className={styles["mahjong__column"]}>
+            <h2>Mahjong</h2>
             <section>
                 <h3>Tiles Out ({ gameData?.data?.deckSize} left)</h3>
                 { renderGrouping(tilesOut, "tilesOut") }
@@ -198,6 +200,10 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn }) {
         <section className={styles["mahjong__column"]}>
             <h3>Move History</h3>
             {renderLastMoves(gameData)}
+            <section className={sharedStyles["controls-container"]}>
+                <button onClick={refreshFn}>Refresh</button>
+                <button onClick={backFn}>Back to Lobby</button>
+            </section>
         </section>
     </section>)
 }

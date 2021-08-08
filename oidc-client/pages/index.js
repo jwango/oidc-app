@@ -1,4 +1,4 @@
-import styles from '../styles/Home.module.css'  
+import styles from '../styles/Shared.module.css'  
 import fetch from 'isomorphic-fetch'
 import Head from 'next/head';
 import GameInterface from '../components/game-interface.component';
@@ -150,27 +150,19 @@ export default function Home({ gatewayUrl }) {
     if (state.userInfo && pubNub) {
       return (
         <main className={styles.main}>
-          <section className={styles["controls-container"]}>
-            <button onClick={logout}>Logout</button>
-          </section>
           {
             !!currentGameId
               ? <PubNubProvider client={pubNub}><GameInterface gatewayUrl={gatewayUrl} errHandler={errHandler} gameId={currentGameId} backFn={() => setCurrentGameId(null)}></GameInterface></PubNubProvider>
-              : <LobbyInterface gatewayUrl={gatewayUrl} errHandler={errHandler} setCurrentGameId={setCurrentGameId}></LobbyInterface>
+              : <LobbyInterface gatewayUrl={gatewayUrl} errHandler={errHandler} setCurrentGameId={setCurrentGameId} logoutFn={logout}></LobbyInterface>
           }
         </main>
       )
     } else {
       return (
         <main className={styles.main}>
-          <h1>Login Page</h1>
-          <section className={styles["state-container"]}>
-            <h2>State</h2>
-            {renderStateDetails(state.userInfo, "userInfo")}
-            {renderState(lastRes, "lastRes")}
-          </section>
+          <h1>Login</h1>
           <section className={styles["controls-container"]}>
-            <button onClick={handleSigninButton}>Sign-in with Google</button>
+            <button onClick={handleSigninButton}>Sign-in (Google)</button>
             <button onClick={createUser}>Create Account</button>
             <button onClick={logout}>Logout</button>
           </section>

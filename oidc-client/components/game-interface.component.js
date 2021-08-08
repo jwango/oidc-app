@@ -1,4 +1,4 @@
-import styles from '../styles/Game.module.css'  
+import styles from '../styles/Shared.module.css'  
 import fetch from 'isomorphic-fetch'
 import { useEffect, useState } from 'react';
 import { usePubNub } from 'pubnub-react';
@@ -139,11 +139,22 @@ export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }
 
   function renderGame(gameDataAndMoves) {
     if (gameDataAndMoves.gameData.type == GAME_TYPES.MAHJONG) {
-     return <Mahjong gameData={gameDataAndMoves.gameData} movesInfo={gameDataAndMoves.movesInfo} submitMoveFn={(move) => makeMove(gameId, move)}></Mahjong>
+     return <Mahjong
+      gameData={gameDataAndMoves.gameData}
+      movesInfo={gameDataAndMoves.movesInfo}
+      submitMoveFn={(move) => makeMove(gameId, move)}
+      refreshFn={() => { getGameData(gameId); getMoves(gameId) }}
+      backFn={backFn}
+    ></Mahjong>
     } else {
       return <div>
+        <h1>{gameDataAndMoves.gameData.type}</h1>
         {renderGameData(gameDataAndMoves.gameData)}
         {renderMoves(gameDataAndMoves.movesInfo.moves)}
+        <section className={styles["controls-container"]}>
+          <button onClick={() => { getGameData(gameId); getMoves(gameId) }}>Refresh</button>
+          <button onClick={backFn}>Back to Lobby</button>
+        </section>
       </div>
     }
   }
@@ -172,14 +183,9 @@ export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }
 
   return (
     <section style={ { "width": "100%" } }>
-        <h1>{ "Game Interface" }</h1>
         <section className={styles["state-container"]}>
           {/*renderStateDetails(messages, "messages")*/}
           {renderGame({ gameData: currentGame, movesInfo: currentMoves })}
-        </section>
-        <section className={styles["controls-container"]}>
-          <button onClick={() => { getGameData(gameId); getMoves(gameId) }}>Refresh</button>
-          <button onClick={() => backFn()}>Back to Lobby</button>
         </section>
         {/* <section className={styles["controls-container"]}>
           <input type="text" value={getURL} onChange={(event) => setGetURL(event.target.value)}></input>

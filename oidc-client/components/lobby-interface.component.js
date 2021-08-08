@@ -1,8 +1,8 @@
-import styles from '../styles/Game.module.css'  
+import styles from '../styles/Shared.module.css'  
 import fetch from 'isomorphic-fetch'
 import { useEffect, useState } from 'react';
 
-export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameId }) {
+export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameId, logoutFn }) {
 
   const GAME_STATES = {
     WAITING: 'WAITING',
@@ -92,8 +92,7 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
   }
 
   function renderGamesTable(games) {
-    if (!games) { return null; }
-    const gameRows = games
+    const gameRows = (games || [])
         .filter((game) => !!state.activeOnly ? game.state !== GAME_STATES.OVER : true)
         .sort((a, b) => a.state.localeCompare(b.state))
         .map(game => {
@@ -114,6 +113,7 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
                 {action}
             </tr>
         })
+    if (!gameRows?.length) { return <p>No games to show</p>; }
     return <table>
         <thead>
             <tr>
@@ -139,25 +139,26 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
   }
 
   return (
-    <section style={ { "width": "100%" } }>
+    <section>
         <h1>Lobby</h1>
-        <section className={styles["state-container"]}>
-          <h2>Games</h2>
+        <section className={styles["controls-container"]}>
           <input type="checkbox" id="activeGame" name="activeOnly" checked={state.activeOnly} onChange={() => setState({ ...state, activeOnly: !state.activeOnly })}></input>
           <label for="activeOnly">Show Active Only</label>
+          <button onClick={getGames}>Refresh</button>
+          <button onClick={logoutFn}>Logout</button>
+        </section>
+        <section className={styles["state-container"]}>
           {renderGamesTable(state.games)}
         </section>
         <section className={styles["controls-container"]}>
-          <button onClick={getGames}>Get Games</button>
-        </section>
-        <section className={styles["controls-container"]}>
-          <button onClick={() => createGame(state.createGameType)}>Create Game</button>
           {renderGameTypesSelect()}
+          <label for="gameTypes">Type</label>
+          <button onClick={() => createGame(state.createGameType)}>New Game</button>
         </section>
         <section className={styles["controls-container"]}>
-          <button onClick={() => registerFor(state.gamePinInput)}>Register For Game</button>
-          <input type="text" value={state.gamePinInput} onChange={(event) => handleGameInput({ pin: event.target.value }) }></input>
-          <label>PIN</label>
+          <input name="pinInput" type="text" value={state.gamePinInput} onChange={(event) => handleGameInput({ pin: event.target.value }) }></input>
+          <label for="pinInput">PIN</label>
+          <button onClick={() => registerFor(state.gamePinInput)}>Register</button>
         </section>
     </section>
   )
