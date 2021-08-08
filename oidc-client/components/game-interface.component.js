@@ -178,8 +178,7 @@ export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }
           {renderGame({ gameData: currentGame, movesInfo: currentMoves })}
         </section>
         <section className={styles["controls-container"]}>
-          <button onClick={() => getGameData(gameId)}>Get Game Data</button>
-          <button onClick={() => getMoves(gameId)}>Get Moves</button>
+          <button onClick={() => { getGameData(gameId); getMoves(gameId) }}>Refresh</button>
           <button onClick={() => backFn()}>Back to Lobby</button>
         </section>
         {/* <section className={styles["controls-container"]}>

@@ -99,7 +99,9 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
         .map(game => {
             let action = <td></td>;
             if (game.state === GAME_STATES.WAITING) {
-                action = <td><button onClick={() => startGame(game.id)}>Start</button></td>
+                if (game.canStart) {
+                  action = <td><button onClick={() => startGame(game.id)}>Start</button></td>
+                }
             } else  {
                 action = <td><button onClick={() => setCurrentGameId(game.id)}>Enter</button></td>
             }

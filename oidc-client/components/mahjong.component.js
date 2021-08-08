@@ -6,6 +6,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn }) {
     const tileHeight = 60
     const tileImagePath = "assets/mahjong/tiles"
     const playerId = gameData?.playerData?.id
+    const directions = ["N", "E", "S", "W"]
 
     const [selectedHandTile, setSelectedHandTile] = useState(null)
     const [playerIdShown, setPlayerIdShown] = useState(playerId)
@@ -54,7 +55,8 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn }) {
         return <ul className={styles[styling]} key={key}>{ tileElements }</ul>
     }
 
-    function renderMoves(movesInfo) {
+    function renderMoves(movesInfo, gameData) {
+        const gameIsOver = !!(gameData?.data?.winner) || !(gameData?.data?.playersToMove?.length)
         const pendingMove = movesInfo?.pendingMove?.moveInfo
         const moves = movesInfo?.moves || []
         const playMoves = moves.filter(move => move.gameType == "MAHJONG" && move.moveInfo.moveType == "PLAY")
@@ -84,7 +86,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn }) {
             if (selectedHandTile != null) {
                 setSelectedHandTile(null)
             }
-            actions.push(<p key="prompt">Or select a tile to play</p>)
+            actions.push(<p key="prompt">You may select a tile to play</p>)
         }
         if (moves.length === 0) {
             actions.push(<p key="nomoves">Currently no moves for you to make</p>)
@@ -92,7 +94,9 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn }) {
         if (pendingMove != null) {
             actions.push(<p key="pendingMove">System is still processing your last move request: {movesInfo.pendingMove.moveInfo.moveType} {movesInfo.pendingMove.moveInfo.tile}</p>)
         }
-        return (<section><h3>Moves</h3>{actions}</section>)
+        const content = gameIsOver ? <p key="gameOver">Game is over</p> : actions
+        const movePrompt = !!(moves.length) ? <p key="playPrompt">Make a move:</p> : null
+        return (<section><h3>Moves</h3>{renderCompass(gameData)}<span className={styles["moves__actions"]}>{movePrompt}{content}</span></section>)
     }
 
     function renderPlayerData(playerData, myselfId) {
@@ -115,11 +119,11 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn }) {
     }
 
     function renderPlayerOptions(gameData) {
-        const otherPlayersData = (gameData?.data?.otherPlayersData || []).map((p, i) => ({ id: p.id, name: p.name || `Other ${i + 1}` }))
+        const otherPlayersData = (gameData?.data?.otherPlayersData || []).map((p, i) => ({ direction: directionOf(p.id, gameData), id: p.id, name: p.name || `Other ${i + 1}` }))
         const myId = gameData?.playerData?.id 
-        const data = [ { id: myId, name: "Myself" }, ...otherPlayersData ].filter((id) => !!id)
+        const data = [ { direction: directionOf(myId, gameData), id: myId, name: "Myself" }, ...otherPlayersData ].filter((id) => !!id)
         const options = data.map(data => {
-            return <option key={data.id} value={data.id} selected={playerIdShown === data.id}>{data.name}</option>
+            return <option key={data.id} value={data.id} selected={playerIdShown === data.id}>({data.direction}) {data.name}</option>
         })
         return <select id="activePlayer" name="activePlayer" onChange={(event) => setPlayerIdShown(event.target.value)}>{options}</select>
     }
@@ -132,9 +136,25 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn }) {
 
         const moves = (gameData?.data?.moves || []).map(move => {
             const withText = !!(move.groupWith?.length) ? `with ${move.groupWith}` : "";
-            return <li><strong>{nameMap[move.playerId] || "???"}:</strong> {move.moveType} {move.tile || ""} {withText}</li>
+            return <li><strong>({directionOf(move.playerId, gameData)}) {nameMap[move.playerId] || "???"}:</strong> {move.moveType} {move.tile || ""} {withText}</li>
         })
         return <ul className={styles["moves__container"]} ref={moveContainerRef}>{moves}</ul>
+    }
+
+    function directionOf(playerId, gameData) {
+        const index = (gameData?.data?.playerSeating || {})[playerId]
+        if (index == null) {
+            return null
+        }
+        return directions[index]
+    }
+
+    function renderCompass(gameData) {
+        const currentPlayer = gameData?.data?.currentPlayerId
+        const direction = directionOf(currentPlayer, gameData)
+        if (direction == null) { return null }
+        const imagePath = `assets/mahjong/COMPASS_${direction}.png`
+        return <img src={imagePath} alt={direction + "highlighted"} width="100"></img>
     }
 
     const tilesOut = gameData?.data?.tilesOut || []
@@ -143,7 +163,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn }) {
 
     const playerRendering = (!playerIdShown || playerIdShown === playerId) ? (<Fragment>
         {renderPlayerData(gameData?.playerData, playerId)}
-        {renderMoves(movesInfo)}
+        {renderMoves(movesInfo, gameData)}
     </Fragment>) : (<Fragment>
         {renderPlayerData(otherPlayersData.find((otherData) => otherData.id === playerIdShown), playerId)}
     </Fragment>)
