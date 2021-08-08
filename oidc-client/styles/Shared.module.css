@@ -45,3 +45,14 @@
     justify-content: center;
     align-items: center;
 }
+
+.layout__container--center {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.layout__column {
+    max-width: 500px;
+}

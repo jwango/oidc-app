@@ -124,9 +124,16 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn, 
         const myId = gameData?.playerData?.id 
         const data = [ { direction: directionOf(myId, gameData), id: myId, name: "Myself" }, ...otherPlayersData ].filter((id) => !!id)
         const options = data.map(data => {
-            return <option key={data.id} value={data.id} selected={playerIdShown === data.id}>({data.direction}) {data.name}</option>
+            return <option key={data.id} value={data.id}>({data.direction}) {data.name}</option>
         })
-        return <select id="activePlayer" name="activePlayer" onChange={(event) => setPlayerIdShown(event.target.value)}>{options}</select>
+        return <select
+            id="activePlayer"
+            name="activePlayer"
+            onChange={(event) => setPlayerIdShown(event.target.value)}
+            value={playerIdShown}
+        >
+            {options}
+        </select>
     }
 
     function renderLastMoves(gameData) {
@@ -135,9 +142,9 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn, 
             return { ...acc, [curr.id]: curr.name || `Other ${i + 1}` }
         }, { [myId]: "You" })
 
-        const moves = (gameData?.data?.moves || []).map(move => {
+        const moves = (gameData?.data?.moves || []).map((move, i) => {
             const withText = !!(move.groupWith?.length) ? `with ${move.groupWith}` : "";
-            return <li><strong>({directionOf(move.playerId, gameData)}) {nameMap[move.playerId] || "???"}:</strong> {move.moveType} {move.tile || ""} {withText}</li>
+            return <li key={`lastMove${i}`}><strong>({directionOf(move.playerId, gameData)}) {nameMap[move.playerId] || "???"}:</strong> {move.moveType} {move.tile || ""} {withText}</li>
         })
         return <ul className={styles["moves__container"]} ref={moveContainerRef}>{moves}</ul>
     }
@@ -182,8 +189,8 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn, 
         }
     }, [movesInfo, gameData])
    
-    return (<section className={styles["mahjong__container"]}>
-        <section className={styles["mahjong__column"]}>
+    return (<section className={sharedStyles["layout__container--center"]}>
+        <section className={sharedStyles["layout__column"]}>
             <h2>Mahjong</h2>
             <section>
                 <h3>Tiles Out ({ gameData?.data?.deckSize} left)</h3>
@@ -197,7 +204,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn, 
                 {playerRendering}
             </section>
         </section>
-        <section className={styles["mahjong__column"]}>
+        <section className={sharedStyles["layout__column"]}>
             <h3>Move History</h3>
             {renderLastMoves(gameData)}
             <section className={sharedStyles["controls-container"]}>

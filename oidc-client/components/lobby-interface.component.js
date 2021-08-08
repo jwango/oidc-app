@@ -143,7 +143,7 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
         <h1>Lobby</h1>
         <section className={styles["controls-container"]}>
           <input type="checkbox" id="activeGame" name="activeOnly" checked={state.activeOnly} onChange={() => setState({ ...state, activeOnly: !state.activeOnly })}></input>
-          <label for="activeOnly">Show Active Only</label>
+          <label htmlFor="activeOnly">Show Active Only</label>
           <button onClick={getGames}>Refresh</button>
           <button onClick={logoutFn}>Logout</button>
         </section>
@@ -152,12 +152,12 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
         </section>
         <section className={styles["controls-container"]}>
           {renderGameTypesSelect()}
-          <label for="gameTypes">Type</label>
+          <label htmlFor="gameTypes">Type</label>
           <button onClick={() => createGame(state.createGameType)}>New Game</button>
         </section>
         <section className={styles["controls-container"]}>
           <input name="pinInput" type="text" value={state.gamePinInput} onChange={(event) => handleGameInput({ pin: event.target.value }) }></input>
-          <label for="pinInput">PIN</label>
+          <label htmlFor="pinInput">PIN</label>
           <button onClick={() => registerFor(state.gamePinInput)}>Register</button>
         </section>
     </section>
