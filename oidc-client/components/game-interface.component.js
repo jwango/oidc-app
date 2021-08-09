@@ -5,7 +5,7 @@ import { usePubNub } from 'pubnub-react';
 import Mahjong from './mahjong.component';
 import GeneralGame from './general-game.component';
 import TicTacToe from './tictactoe.component';
-import { renderStateDetails } from '../utils'
+import { handleFetchResponse } from '../utils'
 
 export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }) {
 
@@ -87,18 +87,6 @@ export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }
       setLastRes("Move accepted.")
     })
     .catch(err => handleErr(err));
-  }
-
-  function handleFetchResponse(res, useJson = true) {
-    if (res.ok) {
-      if (useJson) {
-        return res.json();
-      } else {
-        return res.text();
-      }
-    } else {
-      throw { status: res.status, statusText: res.statusText, body: res.text() };
-    }
   }
 
   function handleErr(err) {

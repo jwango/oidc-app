@@ -1,6 +1,7 @@
 import styles from '../styles/Shared.module.css'  
 import fetch from 'isomorphic-fetch'
 import { useEffect, useState } from 'react';
+import { handleFetchResponse } from '../utils';
 
 export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameId, logoutFn }) {
 
@@ -74,18 +75,6 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
     setState({ ...state, gamePinInput: pin || "", createGameType: gameType || GAME_TYPES.TIC_TAC_TOE });
   }
 
-  function handleFetchResponse(res, useJson = true) {
-    if (res.ok) {
-      if (useJson) {
-        return res.json();
-      } else {
-        return res.text();
-      }
-    } else {
-      throw { status: res.status, statusText: res.statusText, body: res.text() };
-    }
-  }
-
   function handleErr(err) {
     errHandler(err);
     setLastRes(err);
@@ -105,24 +94,24 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
                 action = <td><button onClick={() => setCurrentGameId(game.id)}>Enter</button></td>
             }
             return <tr key={game.id}>
+                {action}
                 <td>{game.name || ""}</td>
                 <td>{game.type}</td>
                 <td>{game.state}</td>
                 <td>{game.playerIds?.length}</td>
                 <td>{game.pin || ""}</td>
-                {action}
             </tr>
         })
     if (!gameRows?.length) { return <p>No games to show</p>; }
     return <table>
         <thead>
-            <tr>
+            <tr>  
+                <th>Action</th>
                 <th>Name</th>
                 <th>Type</th>
                 <th>State</th>
                 <th></th>
                 <th>PIN</th>
-                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -143,11 +132,11 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
         <h1>Lobby</h1>
         <section className={styles["controls-container"]}>
           <input type="checkbox" id="activeGame" name="activeOnly" checked={state.activeOnly} onChange={() => setState({ ...state, activeOnly: !state.activeOnly })}></input>
-          <label htmlFor="activeOnly">Show Active Only</label>
+          <label htmlFor="activeOnly">Active</label>
           <button onClick={getGames}>Refresh</button>
           <button onClick={logoutFn}>Logout</button>
         </section>
-        <section className={styles["state-container"]}>
+        <section className={styles["state-container"] + " " + styles["content__wide"]}>
           {renderGamesTable(state.games)}
         </section>
         <section className={styles["controls-container"]}>
