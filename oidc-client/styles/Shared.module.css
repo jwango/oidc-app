@@ -6,26 +6,31 @@
 .controls-container {
     display: flex;
     flex-direction: row;
-    margin-bottom: 5px;
-    margin-top: 5px;
+    margin-bottom: 4px;
+    margin-top: 2px;
+    flex-wrap: wrap;
+}
+
+.controls-container > * {
+    margin-top: 2px;
 }
 
 .controls-container > button {
     width: 120px;
-    margin-left: 5px;
+    margin-left: 4px;
 }
 
 .controls-container > input[type=text] {
     width: 120px;
 }
 
-.controls-container > select { 
+.controls-container > select {
     width: 120px;
 }
 
 .controls-container > label {
     min-width: 40px;
-    margin-left: 5px;
+    margin-left: 4px;
 }
 
 .state-container {
@@ -54,4 +59,8 @@
 
 .layout__column {
     max-width: 500px;
+}
+
+.content__wide {
+    overflow-x: auto;
 }
