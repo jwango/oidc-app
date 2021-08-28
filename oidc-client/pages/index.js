@@ -1,4 +1,3 @@
-import styles from '../styles/Shared.module.css'  
 import fetch from 'isomorphic-fetch'
 import Head from 'next/head';
 import Link from 'next/link';
@@ -18,7 +17,7 @@ export async function getStaticProps() {
   }
 }
 
-export default function Home({ gatewayUrl, pageActions, setPageActions }) {
+export default function Home({ gatewayUrl }) {
 
   const [currentGameId, setCurrentGameId] = useState(null);
   const [pubNub, setPubNub] = useState(null);
