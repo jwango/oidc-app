@@ -22,6 +22,7 @@ export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }
 
   const mPubNub = usePubNub();
 
+  const [loaded, setLoaded] = useState(false);
   const [channels, setChannels] = useState(new Set());
   const [messages, setMessages] = useState([]);
 
@@ -59,6 +60,7 @@ export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }
     .then(body => {
       setCurrentGame(body);
       setLastRes(body);
+      setLoaded(true);
     })
     .catch(err => handleErr(err));
   }
@@ -100,31 +102,36 @@ export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }
   }
 
   function renderGame(gameDataAndMoves) {
-    if (gameDataAndMoves.gameData.type === GAME_TYPES.MAHJONG) {
-     return <Mahjong
-      gameData={gameDataAndMoves.gameData}
-      movesInfo={gameDataAndMoves.movesInfo}
-      submitMoveFn={(move) => makeMove(gameId, move)}
-      refreshFn={() => refresh(gameId)}
-      backFn={goBack}
-    ></Mahjong>
-    } else if (gameDataAndMoves.gameData.type === GAME_TYPES.TIC_TAC_TOE) {
-      return <TicTacToe
-        gameData={gameDataAndMoves.gameData}
-        movesInfo={gameDataAndMoves.movesInfo}
-        submitMoveFn={(move) => makeMove(gameId, move)}
-        refreshFn={() => refresh(gameId)}
-        backFn={goBack}
-      ></TicTacToe>
+    if (loaded) {
+      if (gameDataAndMoves.gameData.type === GAME_TYPES.MAHJONG) {
+        return <Mahjong
+         gameData={gameDataAndMoves.gameData}
+         movesInfo={gameDataAndMoves.movesInfo}
+         submitMoveFn={(move) => makeMove(gameId, move)}
+         refreshFn={() => refresh(gameId)}
+         backFn={goBack}
+       ></Mahjong>
+       } else if (gameDataAndMoves.gameData.type === GAME_TYPES.TIC_TAC_TOE) {
+         return <TicTacToe
+           gameData={gameDataAndMoves.gameData}
+           movesInfo={gameDataAndMoves.movesInfo}
+           submitMoveFn={(move) => makeMove(gameId, move)}
+           refreshFn={() => refresh(gameId)}
+           backFn={goBack}
+         ></TicTacToe>
+       } else {
+         return <GeneralGame
+           gameData={gameDataAndMoves.gameData}
+           movesInfo={gameDataAndMoves.movesInfo}
+           submitMoveFn={(move) => makeMove(gameId, move)}
+           refreshFn={() => refresh(gameId)}
+           backFn={goBack}
+         ></GeneralGame>
+       }
     } else {
-      return <GeneralGame
-        gameData={gameDataAndMoves.gameData}
-        movesInfo={gameDataAndMoves.movesInfo}
-        submitMoveFn={(move) => makeMove(gameId, move)}
-        refreshFn={() => refresh(gameId)}
-        backFn={goBack}
-      ></GeneralGame>
+      return <p>Loading your game...</p>;
     }
+   
   }
 
   function makeRequest(url) {

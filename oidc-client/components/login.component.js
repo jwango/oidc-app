@@ -10,6 +10,7 @@ export default function Login({ gatewayUrl, logoutFn, setUserInfo }) {
         ACCOUNT_FOUND: 'ACCOUNT_FOUND'
     };
 
+    const [loading, setLoading] = useState(false);
     const [lastRes, setLastRes] = useState({});
     const [loginState, setLoginState] = useState(LOGIN_STATES.LOGGED_OUT);
 
@@ -17,7 +18,9 @@ export default function Login({ gatewayUrl, logoutFn, setUserInfo }) {
         const queryParams = getQueryParams(window.location.href);
     
         if (queryParams["loggedIn"] === "true") {
+            setLoading(true);
             getUserInfo().catch(err => {
+                setLoading(false);
                 if (err.status == 404) {
                     setLastRes("Looks like you don't have an account! Create an account to proceed.");
                     setLoginState(LOGIN_STATES.ACCOUNT_NOT_FOUND);
@@ -36,16 +39,20 @@ export default function Login({ gatewayUrl, logoutFn, setUserInfo }) {
     }
 
     function signin() {
-        getUserInfo().catch(err => {
-            console.log(err);
-            if (err.status === 401) {
-                login();
-            } else if (err.status === 404) {
-                const queryParams = getQueryParams(window.location.href);
-                const attempts = +(queryParams["signIn"] || 0) + 1;
-                logoutFn({ "signIn": `${attempts}` });
-            }
-        });
+        setLoading(true);
+        getUserInfo()
+            .then(() => { setLoading(false); })
+            .catch(err => {
+                setLoading(false);
+                console.log(err);
+                if (err.status === 401) {
+                    login();
+                } else if (err.status === 404) {
+                    const queryParams = getQueryParams(window.location.href);
+                    const attempts = +(queryParams["signIn"] || 0) + 1;
+                    logoutFn({ "signIn": `${attempts}` });
+                }
+            });
     }
 
     function login() {
@@ -79,19 +86,26 @@ export default function Login({ gatewayUrl, logoutFn, setUserInfo }) {
     }
 
     let buttons = null;
+    let text = "Shall we play a game?";
     if (loginState === LOGIN_STATES.LOGGED_OUT) {
-        buttons = <button onClick={handleSigninButton}>Sign-in (Google)</button>
+        buttons = <button onClick={handleSigninButton}>Sign-in (Google)</button>;
     } else if (loginState === LOGIN_STATES.ACCOUNT_NOT_FOUND) {
         buttons = (<Fragment>
             <button onClick={createUser}>Create Account</button>
-            <button onClick={logoutFn}>Logout</button>
-        </Fragment>)
+            <button onClick={logoutFn}>Nevermind</button>
+        </Fragment>);
+        text = "Looks like you're new. Would you like to create an account?"
     } else if (loginState === LOGIN_STATES.ACCOUNT_FOUND) {
         buttons = <button onClick={logoutFn}>Logout</button>
     }
+    if (loading) { 
+        text = "Loading...";
+        buttons = null;
+    };
       
     return (<section>
         <h1>Login</h1>
+        <p>{text}</p>
         <section className={sharedStyles["controls-container"]}>
             {buttons}
         </section>

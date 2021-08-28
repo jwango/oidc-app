@@ -130,27 +130,33 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
   return (
     <section>
         <h1>Lobby</h1>
-        <h2>Games</h2>
-        <section className={styles["controls-container"]}>
-          <input type="checkbox" id="activeGame" name="activeOnly" checked={state.activeOnly} onChange={() => setState({ ...state, activeOnly: !state.activeOnly })}></input>
-          <label htmlFor="activeOnly">Active</label>
-          <button onClick={getGames}>Refresh</button>
-          <button onClick={() => logoutFn()}>Logout</button>
-        </section>
-        <section className={styles["state-container"] + " " + styles["content__wide"]}>
-          {renderGamesTable(state.games)}
-        </section>
-        <h2>Host</h2>
-        <section className={styles["controls-container"]}>
-          <label htmlFor="gameTypes">Type</label>
-          {renderGameTypesSelect()}
-          <button onClick={() => createGame(state.createGameType)}>New Game</button>
-        </section>
-        <h2>Join</h2>
-        <section className={styles["controls-container"]}>
-          <label htmlFor="pinInput">PIN</label>
-          <input name="pinInput" type="text" value={state.gamePinInput} onChange={(event) => handleGameInput({ pin: event.target.value }) }></input>
-          <button onClick={() => registerFor(state.gamePinInput)}>Register</button>
+        <section className={styles["layout__container"]}>
+          <section className={styles["layout__column"]}>
+            <h2>Games</h2>
+            <section className={styles["controls-container"]}>
+              <input type="checkbox" id="activeGame" name="activeOnly" checked={state.activeOnly} onChange={() => setState({ ...state, activeOnly: !state.activeOnly })}></input>
+              <label htmlFor="activeOnly">Active</label>
+              <button onClick={getGames}>Refresh</button>
+              <button onClick={() => logoutFn()}>Logout</button>
+            </section>
+            <section className={styles["state-container"] + " " + styles["content__wide"]}>
+              {renderGamesTable(state.games)}
+            </section>
+          </section>
+          <section className={styles["layout__column"]}>
+            <h2>Host</h2>
+            <section className={styles["controls-container"]}>
+              <label htmlFor="gameTypes">Type</label>
+              {renderGameTypesSelect()}
+              <button onClick={() => createGame(state.createGameType)}>New Game</button>
+            </section>
+          <h2>Join</h2>
+            <section className={styles["controls-container"]}>
+              <label htmlFor="pinInput">PIN</label>
+              <input name="pinInput" type="text" value={state.gamePinInput} onChange={(event) => handleGameInput({ pin: event.target.value }) }></input>
+              <button onClick={() => registerFor(state.gamePinInput)}>Register</button>
+            </section>
+          </section>
         </section>
     </section>
   )

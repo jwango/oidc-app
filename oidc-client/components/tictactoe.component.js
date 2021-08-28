@@ -35,7 +35,7 @@ export default function TicTacToe({ gameData, movesInfo, submitMoveFn, refreshFn
         );
       }
 
-    return (<section className={sharedStyles["layout__container--center"]}>
+    return (<section className={sharedStyles["layout__container"]}>
         <section className={sharedStyles["layout__column"]}>
             <h2>{gameData.type}</h2>
             {renderTicTacToeGameData(gameData)}

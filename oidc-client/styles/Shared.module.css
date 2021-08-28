@@ -50,14 +50,16 @@
     justify-content: center;
 }
 
-.layout__container--center {
+.layout__container {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    justify-content: space-between;
 }
 
 .layout__column {
     max-width: 425px;
+    padding-right: 60px;
 }
 
 .content__wide {

@@ -189,7 +189,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn, 
         }
     }, [movesInfo, gameData])
    
-    return (<section className={sharedStyles["layout__container--center"]}>
+    return (<section className={sharedStyles["layout__container"]}>
         <section className={sharedStyles["layout__column"]}>
             <h2>Mahjong</h2>
             <section>

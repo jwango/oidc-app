@@ -13,11 +13,13 @@ function MyApp({ Component, pageProps }) {
         </header>
         <nav>
           <div className='content-wrapper'>
-            <Link href='https://www.jwango.com'><a className='nav-link--active'>Main Site</a></Link>
+            <Link href='https://www.jwango.com'><a className='nav-link--active'>Blog</a></Link>
           </div>
         </nav>
         <main className='content-wrapper'><Component {...pageProps} /></main>
         <footer className='main__footer content-wrapper'>
+          <p>Hello! As a disclaimer, this site makes use of 3rd party cookies to maintain your session cookies.
+            If you use a browser that blocks such cookies, you won't be able to use this site until you disable that setting or until the session resolver is on the same domain.</p>
         </footer>
       </div>
     </span>

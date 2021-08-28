@@ -15,7 +15,7 @@ export default function GeneralGame({ gameData, movesInfo, submitMoveFn, refresh
         return renderJson(move);
     }
 
-    return (<section className={sharedStyles["layout__container--center"]}>
+    return (<section className={sharedStyles["layout__container"]}>
       <section className={sharedStyles["layout__column"]}>
         <h2>{gameData.type}</h2>
         {renderJson(gameData)}
