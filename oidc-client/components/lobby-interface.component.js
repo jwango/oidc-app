@@ -131,7 +131,7 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
     <section>
         <h1>Lobby</h1>
         <section className={styles["layout__container"]}>
-          <section className={styles["layout__column"]}>
+          <section className={styles["layout__column"] + " " + styles["layout__column--wide"]}>
             <h2>Games</h2>
             <section className={styles["controls-container"]}>
               <input type="checkbox" id="activeGame" name="activeOnly" checked={state.activeOnly} onChange={() => setState({ ...state, activeOnly: !state.activeOnly })}></input>
