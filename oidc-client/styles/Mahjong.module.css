@@ -3,9 +3,11 @@
     padding-left: 15px;
 }
 
-.player__tile {
+ul > li.player__tile {
     list-style: none;
     display: inline-block;
+    margin: 0px;
+    padding: 0px;
 }
 
 .grouping {

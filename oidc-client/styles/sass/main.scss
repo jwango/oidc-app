@@ -1,0 +1,351 @@
+@import 'reset';
+@import 'mixins';
+
+.app--default {
+    $primary: #666699;
+    $on-primary: #ffffff;
+
+    $secondary: #0099cc;
+    $on-secondary: $on-primary;
+    $on-secondary-faded: #DDDDDD;
+
+    $background: #ffffff;
+    $background-skeleton: #F7F7F7;
+    $background-faded: #DDDDDD;
+    $on-background: #000000;
+    $on-background-faded: #777777;
+
+    $warn: #ff0000;
+    $on-warn: $on-primary;
+
+    $error: #ffbf3d;
+
+    $header-height: 7rem;
+    $nav-height: 2.5rem;
+    $content-padding: 16px;
+    $code-padding: 0.125rem;
+    $li-padding: 0.125rem;
+
+    $content-width: 100%;
+    $break-md: 768px;
+    $break-lg: 1012px;
+
+    %primary {
+        @include theme-color($primary, $on-primary);
+    }
+
+    %secondary {
+        @include theme-color($secondary, $on-secondary);
+    }
+
+    %background {
+        @include theme-color($background, $on-background);
+    }
+
+    %warn {
+        @include theme-color($warn, $on-warn);
+    }
+
+    .color-background-faded {
+        color: $on-background-faded;
+    }
+
+    font-family: 'Helvetica';
+    line-height: 1.25;
+    @extend %background;
+
+    // Layout
+    * {
+        box-sizing: border-box;
+    }
+
+    #disqus_thread {
+        margin-top: 16px;
+    }
+
+    .list--no-style {
+        padding-left: 0;
+
+        li {
+            list-style: none;
+            margin: 0;
+            padding-left: 0;
+        }
+        
+    }
+
+    .clearfix {
+        clear: both;
+    }
+
+    .content-wrapper {
+        width: $content-width;
+        padding-left: $content-padding;
+        padding-right: $content-padding;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .container {
+        min-height: 100%;
+        min-height: 100vh;
+        @extend %background;
+    }
+
+    .row {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .column {
+        display: flex;
+        flex-direction: column;
+    }
+
+    header {
+        @extend %background;
+        flex-shrink: 0;
+        flex-grow: 0;
+    }
+
+    header.main__header {
+        @extend %primary;
+        width: 100%;
+        height: $header-height;
+        text-align: left;
+        padding: 1rem 0;
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 200;
+            font-stretch: condensed;
+            margin: 0;
+        }
+    }
+
+    nav {
+        background-color: $primary;
+        color: $on-primary;
+        position: sticky;
+        top: 0;
+        width: 100%;
+        height: $nav-height;
+        margin-top: -1 * $nav-height;
+        flex-grow: 0;
+        flex-shrink: 0;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+
+        .nav-link--active {
+            text-decoration: underline;
+        }
+
+        a {
+            padding: 0.25rem 0rem;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1.25rem;
+        }
+
+        a + a {
+            margin-left: 1.75rem;
+        }
+
+        a:link, a:visited {
+            color: $on-primary;
+        }
+
+        a:hover, a:active {
+            color: darken($on-primary, 10%);
+        }
+    }
+
+    main {
+        width: 100%;
+        height: 100%;
+        flex-grow: 1;
+        flex-shrink: 0;
+    }
+
+    p {
+        margin-bottom: 1rem;
+        word-wrap: break-word;
+    }
+
+    .main__footer-icon {
+        height: 24px;
+        margin-bottom: -5px;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    footer {
+        &.main__footer {
+            @extend %background;
+            padding-top: 1rem;
+            padding-bottom: 2rem;
+            flex-shrink: 0;
+            p {
+                margin-bottom: 0.5rem;
+                text-align: center;
+            }
+        }
+    }
+
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    h2 {
+        font-size: 2rem;
+    }
+
+    h3 {
+        font-size: 1.75rem;
+    }
+
+    h4 {
+        font-size: 1.6rem;
+    }
+
+    h5 {
+        font-size: 1.5rem;
+    }
+
+    h6 {
+        font-size: 1.1rem;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        line-height: 1;
+    }
+    
+    // Atoms
+    button {
+        border-width: 0;
+        border-style: none;
+        padding: 0.25rem 0.5rem;
+        background-color: $background-faded;
+        color: #333333;
+    }
+
+    button:hover, button:focus {
+        cursor: pointer;
+        outline: 0rem;
+
+        &.btn--flat {
+            color: $on-background-faded;
+
+            &.btn--secondary {
+                color: $on-secondary-faded;
+            }
+        }
+    }
+
+    a {
+        color: $secondary;
+    }
+
+    blockquote {
+        margin-left: 0rem;
+        padding-left: 0.5rem;
+        border-style: solid;
+        border-left-width: 0.5rem;
+        border-color: darken($background, 50%);
+        color: $on-background;
+        background-color: darken($background, 10%);
+        overflow: hidden;
+    }
+
+    code {
+        line-height: 1.25;
+        color: $secondary;
+        border-radius: 0.25rem;
+        background-color: darken($background, 10%);
+        display: inline;
+        padding: $code-padding 0rem;
+
+        &.codeBlock {
+            color: $on-background;
+            padding: 1rem;
+            margin: 1rem 0rem;
+            border-radius: 1rem;
+            display: block;
+            overflow-x: auto;
+        }
+    }
+
+    img {
+        max-width: 100%;
+
+        &.img__inline {
+            float: left;
+        }
+    }
+
+    time {
+        color: $on-background-faded;
+    }
+
+    .anchor {
+        display: block;
+        margin-top: -1 * $nav-height;
+        height: $nav-height;
+        visibility: hidden;
+    }
+
+    // Lists
+    ul {
+        padding: $li-padding * 2;
+    }
+
+    ol {
+        padding: $li-padding * 2;
+    }
+
+    ul > li {
+        margin-left: 1rem; 
+        padding: $li-padding * 2;
+        list-style-type: circle;
+        list-style-position: outside;
+    }
+
+    ol > li {
+        margin-left: 1rem; 
+        padding: $li-padding * 2;
+        list-style-type: decimal;
+        list-style-position: outside;
+    }
+
+    table,
+    td {
+        border: 1px solid #333;
+        padding: 0px 5px;
+    }
+
+    thead,
+    tfoot {
+        background-color: #333;
+        color: #fff;
+    }
+
+
+    @media only screen and (min-width: $break-md) {
+        .content-wrapper {
+            width: $break-md;
+            padding-left: 32px;
+            padding-right: 32px;
+        }
+    }
+
+    @media only screen and (min-width: $break-lg) {
+        .content-wrapper {
+            width: $break-lg;
+            padding-left: 64px;
+            padding-right: 64px;
+        }
+    }
+}

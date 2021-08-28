@@ -2,7 +2,7 @@ import styles from '../styles/Shared.module.css'
 import fetch from 'isomorphic-fetch'
 import Head from 'next/head';
 import GameInterface from '../components/game-interface.component';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { handleFetchResponse, setQueryParams } from '../utils'
 import PubNub from 'pubnub';
 import { PubNubProvider } from 'pubnub-react';
@@ -57,11 +57,9 @@ export default function Home({ gatewayUrl }) {
     ) : (
       <Login gatewayUrl={gatewayUrl} errHandler={errHandler} logoutFn={logout} setUserInfo={setUserInfo}></Login>
     )
-    return (
-      <main className={styles.main}>
+    return (<Fragment>
         {content}
-      </main>
-    )
+        </Fragment>)
   }
 
   return (
