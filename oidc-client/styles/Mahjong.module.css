@@ -45,7 +45,14 @@ ul > li.player__tile {
     list-style: none;
 }
 
-.moves__actions {
+.moves__actions-container {
     display: inline-block;
     vertical-align: top;
+    width: 60%;
+}
+
+button.moves__action {
+    width: fit-content;
+    margin-right: 4px;
+    margin-bottom: 4px;
 }

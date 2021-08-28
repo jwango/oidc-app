@@ -66,6 +66,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
             .map(move => {
                 const moveText = (move.moveInfo.moveType == "EAT") ? `EAT with ${move.moveInfo.groupWith}` : move.moveInfo.moveType;
                 return <button
+                    className={styles["moves__action"]}
                     key={moveText}
                     onClick={() => { setSelectedHandTile(null); submitMoveFn(move)}}
                     disabled={!!pendingMove}>
@@ -75,6 +76,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
         const selectedMove = playMoves.find(playMove => !!selectedHandTile && playMove.moveInfo.tile == selectedHandTile.tile)
         if (!!selectedMove) {
             actions.push(<button
+                className={styles["moves__action"]}
                 key={"Play"+selectedHandTile.tile}
                 onClick={() => {
                     setSelectedHandTile(null)
@@ -96,8 +98,11 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
             actions.push(<p key="pendingMove">System is still processing your last move request: {movesInfo.pendingMove.moveInfo.moveType} {movesInfo.pendingMove.moveInfo.tile}</p>)
         }
         const content = gameIsOver ? <p key="gameOver">Game is over</p> : actions
-        const movePrompt = !!(moves.length) ? <p key="playPrompt">Make a move:</p> : null
-        return (<section><h3>Moves</h3>{renderCompass(gameData)}<span className={styles["moves__actions"]}>{movePrompt}{content}</span></section>)
+        return (<section>
+            <h3>Moves</h3>
+            {renderCompass(gameData)}
+            <span className={styles["moves__actions-container"]}>{content}</span>
+        </section>)
     }
 
     function renderPlayerData(playerData, myselfId) {
