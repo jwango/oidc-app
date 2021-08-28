@@ -1,6 +1,7 @@
 import styles from '../styles/Shared.module.css'  
 import fetch from 'isomorphic-fetch'
 import Head from 'next/head';
+import Link from 'next/link';
 import GameInterface from '../components/game-interface.component';
 import { Fragment, useEffect, useState } from 'react';
 import { handleFetchResponse, setQueryParams } from '../utils'
@@ -17,7 +18,7 @@ export async function getStaticProps() {
   }
 }
 
-export default function Home({ gatewayUrl }) {
+export default function Home({ gatewayUrl, pageActions, setPageActions }) {
 
   const [currentGameId, setCurrentGameId] = useState(null);
   const [pubNub, setPubNub] = useState(null);
@@ -49,6 +50,19 @@ export default function Home({ gatewayUrl }) {
     }
   }
 
+  function renderPageActions() {
+    const pageActions = [];
+    if (userInfo && pubNub) {
+      pageActions.push({ name: "Logout", callback: logout });
+      if (!!currentGameId) {
+        pageActions.push({ name: "Lobby", callback: () => setCurrentGameId(null) });
+      }
+    }
+    return pageActions.map(action => {
+      return (<button key={action.name} onClick={() => action.callback()}>{action.name}</button>);
+    });
+  }
+
   function renderContent() {
     const content = (userInfo && pubNub) ? (
       !!currentGameId
@@ -59,16 +73,27 @@ export default function Home({ gatewayUrl }) {
     )
     return (<Fragment>
         {content}
-        </Fragment>)
+    </Fragment>)
   }
 
   return (
-    <div className={styles.container}>
+    <Fragment>
       <Head>
         <title>jwango games</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      {renderContent()}
-    </div>
+      <header className='main__header'>
+        <div className='content-wrapper'>
+          <h1>JWANGO</h1>
+        </div>
+      </header>
+      <nav>
+        <div className='content-wrapper'>
+          <Link href='https://www.jwango.com'><a className='nav-link--active'>Blog</a></Link>
+          {renderPageActions()}
+        </div>
+      </nav>
+      <main className='content-wrapper'>{renderContent()}</main>
+    </Fragment>
   )
 }

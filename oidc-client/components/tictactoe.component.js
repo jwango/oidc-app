@@ -1,6 +1,6 @@
 import sharedStyles from '../styles/Shared.module.css'
 
-export default function TicTacToe({ gameData, movesInfo, submitMoveFn, refreshFn, backFn }) {
+export default function TicTacToe({ gameData, movesInfo, submitMoveFn, refreshFn }) {
     const ROW_TO_LETTER = {
         0: "A",
         1: "B",
@@ -42,7 +42,6 @@ export default function TicTacToe({ gameData, movesInfo, submitMoveFn, refreshFn
             {renderMoves(movesInfo.moves)}
             <section className={sharedStyles["controls-container"]}>
             <button onClick={refreshFn}>Refresh</button>
-            <button onClick={backFn}>Back to Lobby</button>
             </section>
         </section>
     </section>)

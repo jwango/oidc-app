@@ -141,14 +141,16 @@
             text-decoration: underline;
         }
 
-        a {
+        button, a {
+            background-color: $primary;
+            color: $on-primary;
             padding: 0.25rem 0rem;
             text-decoration: none;
             display: inline-block;
             font-size: 1.25rem;
         }
 
-        a + a {
+        a + a, button + button, a + button {
             margin-left: 1.75rem;
         }
 

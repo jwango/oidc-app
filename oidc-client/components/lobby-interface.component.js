@@ -3,7 +3,7 @@ import fetch from 'isomorphic-fetch'
 import { useEffect, useState } from 'react';
 import { handleFetchResponse } from '../utils';
 
-export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameId, logoutFn }) {
+export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameId }) {
 
   const GAME_STATES = {
     WAITING: 'WAITING',
@@ -137,7 +137,6 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
               <input type="checkbox" id="activeGame" name="activeOnly" checked={state.activeOnly} onChange={() => setState({ ...state, activeOnly: !state.activeOnly })}></input>
               <label htmlFor="activeOnly">Active</label>
               <button onClick={getGames}>Refresh</button>
-              <button onClick={() => logoutFn()}>Logout</button>
             </section>
             <section className={styles["state-container"] + " " + styles["content__wide"]}>
               {renderGamesTable(state.games)}

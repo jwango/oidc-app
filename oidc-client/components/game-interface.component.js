@@ -109,7 +109,6 @@ export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }
          movesInfo={gameDataAndMoves.movesInfo}
          submitMoveFn={(move) => makeMove(gameId, move)}
          refreshFn={() => refresh(gameId)}
-         backFn={goBack}
        ></Mahjong>
        } else if (gameDataAndMoves.gameData.type === GAME_TYPES.TIC_TAC_TOE) {
          return <TicTacToe
@@ -117,7 +116,6 @@ export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }
            movesInfo={gameDataAndMoves.movesInfo}
            submitMoveFn={(move) => makeMove(gameId, move)}
            refreshFn={() => refresh(gameId)}
-           backFn={goBack}
          ></TicTacToe>
        } else {
          return <GeneralGame

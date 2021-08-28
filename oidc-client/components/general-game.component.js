@@ -1,7 +1,7 @@
 import sharedStyles from '../styles/Shared.module.css'
 import { renderJson } from '../utils'
 
-export default function GeneralGame({ gameData, movesInfo, submitMoveFn, refreshFn, backFn }) {
+export default function GeneralGame({ gameData, movesInfo, submitMoveFn, refreshFn }) {
     function renderMoves(moves) {
         if (!moves) { return null; }
         const moveElements = moves.map((move, index) => <li key={index}>
@@ -22,7 +22,6 @@ export default function GeneralGame({ gameData, movesInfo, submitMoveFn, refresh
         {renderMoves(movesInfo.moves)}
         <section className={sharedStyles["controls-container"]}>
           <button onClick={refreshFn}>Refresh</button>
-          <button onClick={backFn}>Back to Lobby</button>
         </section>
       </section>
     </section>)
