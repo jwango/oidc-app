@@ -1,4 +1,4 @@
-import fetch from 'isomorphic-fetch'
+import fetch from 'isomorphic-fetch';
 import Head from 'next/head';
 import Link from 'next/link';
 import GameInterface from '../components/game-interface.component';
@@ -88,7 +88,7 @@ export default function Home({ gatewayUrl }) {
       </header>
       <nav>
         <div className='content-wrapper'>
-          <Link href='https://www.jwango.com'><a className='nav-link--active'>Blog</a></Link>
+          <Link href='https://www.jwango.com'><a>Blog</a></Link>
           {renderPageActions()}
         </div>
       </nav>
