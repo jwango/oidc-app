@@ -1,4 +1,4 @@
-import Mahjong from "../components/mahjong.component"
+import Mahjong from "../features/mahjong/mahjong.component"
 
 export default function Test() {
     return <Mahjong gameData={eatData} moves={eatMoves}></Mahjong>

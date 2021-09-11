@@ -2,7 +2,7 @@ import styles from '../styles/Shared.module.css'
 import fetch from 'isomorphic-fetch'
 import { useEffect, useState } from 'react';
 import { usePubNub } from 'pubnub-react';
-import Mahjong from './mahjong.component';
+import Mahjong from '../features/mahjong/mahjong.component';
 import GeneralGame from './general-game.component';
 import TicTacToe from './tictactoe.component';
 import { handleFetchResponse } from '../utils'

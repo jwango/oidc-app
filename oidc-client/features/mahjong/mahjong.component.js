@@ -1,27 +1,20 @@
-import sharedStyles from '../styles/Shared.module.css'  
-import styles from '../styles/Mahjong.module.css'  
 import { Fragment, useEffect, createRef, useState } from "react"
 
+import styles from './Mahjong.module.css';
+import MahjongRules from "./mahjong-rules.component";
+import MahjongGrouping, { GROUPING_TYPES } from "./mahjong-grouping.component";
+import { getTileSrc } from "./mahjong.util";
+import sharedStyles from '../../styles/Shared.module.css';
+
+
 export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }) {
-    const tileWidth = 40
-    const tileHeight = 60
-    const tileImagePath = "assets/mahjong/tiles"
     const playerId = gameData?.playerData?.id
     const directions = ["N", "E", "S", "W"]
 
     const [selectedHandTile, setSelectedHandTile] = useState(null)
     const [playerIdShown, setPlayerIdShown] = useState(playerId)
+    const [rulesVisible, setRulesVisible] = useState(false);
     const moveContainerRef = createRef();
-
-    function getTileFileName(tile) {
-        if (!tile) {
-            return "HIDDEN.png"
-        } else if (tile.startsWith("FLOWER")) {
-            return "FLOWER.png"
-        } else {
-            return tile + ".png"
-        }
-    }
 
     function renderHand(tiles) {
         const handTiles = tiles.map((tile, index) => {
@@ -34,10 +27,8 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
                 <input
                     type="image"
                     className={styles["hand__tile-image"] + " " + styles[stateCss]}
-                    src={tileImagePath + "/" + getTileFileName(tile)}
+                    src={getTileSrc(tile)}
                     alt={tile}
-                    width={tileWidth}
-                    height={tileHeight}
                     onClick={() => {
                         if (isSelected) { setSelectedHandTile(null) } else { setSelectedHandTile({ tile, index }) }
                     }}
@@ -47,13 +38,12 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
         return <ul className={styles["player__hand"]}>{ handTiles }</ul>
     }
 
-    function renderGrouping(tiles, key, styling = "grouping") {
-        const tileElements = tiles.map((tile, index) => {
-            return <li key={tile + index} className={styles["player__tile"]}>
-                <img src={tileImagePath + "/" + getTileFileName(tile)} alt={tile} width={tileWidth} height={tileHeight}></img>
-            </li>
-        })
-        return <ul className={styles[styling]} key={key}>{ tileElements }</ul>
+    function renderGrouping(tiles, key, styling = GROUPING_TYPES.GROUPING) {
+      return <MahjongGrouping
+        tiles={tiles}
+        key={key}
+        groupingType={styling}
+      ></MahjongGrouping>;
     }
 
     function renderMoves(movesInfo, gameData) {
@@ -193,28 +183,35 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
             moveContainerRef.current.scrollTop = moveContainerRef.current.scrollHeight;
         }
     }, [movesInfo, gameData])
-   
-    return (<section className={sharedStyles["layout__container"]}>
-        <section className={sharedStyles["layout__column"]}>
-            <h2>Mahjong</h2>
-            <section>
-                <h3>Tiles Out ({ gameData?.data?.deckSize} left)</h3>
-                { renderGrouping(tilesOut, "tilesOut") }
-            </section>
-            <section>
-                <h3>
-                    <label>Look at </label>
-                    {renderPlayerOptions(gameData)}
-                </h3>
-                {playerRendering}
-            </section>
+
+    function renderGame() {
+      return (<article>
+        <h1>Mahjong</h1>
+        <section className={sharedStyles["controls-container"]}>
+          <button type="button" onClick={() => setRulesVisible(true)}>Show Rules</button>
+          <button onClick={refreshFn}>Refresh</button>
         </section>
-        <section className={sharedStyles["layout__column"]}>
+        <div className={sharedStyles["layout__container"]}>
+          <section className={sharedStyles["layout__column"] + " " + sharedStyles["layout__column--wide"]}>
+            <section>
+              <h3>Tiles Out ({ gameData?.data?.deckSize} left)</h3>
+              { renderGrouping(tilesOut, "tilesOut") }
+            </section>
+            <section>
+              <h3>
+                <label>Look at </label>
+                {renderPlayerOptions(gameData)}
+              </h3>
+              {playerRendering}
+            </section>
+          </section>
+          <section className={sharedStyles["layout__column"] + " " + sharedStyles["layout__column--skinny"]}>
             <h3>Move History</h3>
             {renderLastMoves(gameData)}
-            <section className={sharedStyles["controls-container"]}>
-                <button onClick={refreshFn}>Refresh</button>
-            </section>
-        </section>
-    </section>)
+          </section>
+        </div>          
+      </article>)
+    }
+
+    return rulesVisible ? <MahjongRules backFn={() => setRulesVisible(false)}></MahjongRules> : renderGame();
 }

@@ -10,10 +10,25 @@ ul > li.player__tile {
     padding: 0px;
 }
 
-.grouping {
+.player__tile > img {
+  width: 40px;
+  height: 60px;
+}
+
+.grouping, .grouping__figure {
     margin: 0px;
     padding-left: 15px;
     display: inline-block;
+}
+
+.grouping__figure .player__tile > img {
+  width: 32px;
+  height: 48px;
+}
+
+.hand__tile-image {
+  width: 40px;
+  height: 60px;
 }
 
 .hand__tile-image:hover {
@@ -55,4 +70,15 @@ button.moves__action {
     width: fit-content;
     margin-right: 4px;
     margin-bottom: 4px;
+}
+
+.rules {
+  width: 100%;
+}
+
+@media only screen and (min-width: 1012px) {
+  .grouping__figure .player__tile > img {
+    width: 40px;
+    height: 60px;
+  }
 }

@@ -142,14 +142,14 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
               {renderGamesTable(state.games)}
             </section>
           </section>
-          <section className={styles["layout__column"]}>
+          <section className={styles["layout__column"] + " " + styles["layout__column--skinny"]}>
             <h2>Host</h2>
-            <section className={styles["controls-container"]}>
-              <label htmlFor="gameTypes">Type</label>
-              {renderGameTypesSelect()}
-              <button onClick={() => createGame(state.createGameType)}>New Game</button>
-            </section>
-          <h2>Join</h2>
+              <section className={styles["controls-container"]}>
+                <label htmlFor="gameTypes">Type</label>
+                {renderGameTypesSelect()}
+                <button onClick={() => createGame(state.createGameType)}>New Game</button>
+              </section>
+            <h2>Join</h2>
             <section className={styles["controls-container"]}>
               <label htmlFor="pinInput">PIN</label>
               <input name="pinInput" type="text" value={state.gamePinInput} onChange={(event) => handleGameInput({ pin: event.target.value }) }></input>

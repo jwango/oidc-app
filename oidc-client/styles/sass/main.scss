@@ -235,7 +235,6 @@
 
     button:hover, button:focus {
         cursor: pointer;
-        outline: 0rem;
 
         &.btn--flat {
             color: $on-background-faded;
@@ -324,7 +323,7 @@
     table,
     td {
         border: 1px solid #333;
-        padding: 0px 5px;
+        padding: 5px 5px;
     }
 
     thead,
@@ -333,6 +332,30 @@
         color: #fff;
     }
 
+    dl {
+      margin-bottom: 20px;
+    }
+
+    dt {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    dd {
+      margin-bottom: 10px;
+    }
+
+    figure {
+      margin-bottom: 10px;
+    }
+
+    figcaption {
+      font-style: italic;
+
+      em {
+        font-style: normal;
+      }
+    }
 
     @media only screen and (min-width: $break-md) {
         .content-wrapper {

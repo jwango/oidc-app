@@ -47,13 +47,13 @@ export default function TicTacToe({ gameData, movesInfo, submitMoveFn, refreshFn
       }
 
     return (<section className={sharedStyles["layout__container"]}>
-        <section className={sharedStyles["layout__column"]}>
-            <h2>{gameData.type}</h2>
+        <section className={sharedStyles["layout__column"] + " " + sharedStyles["layout__column--wide"]}>
+            <h1>{gameData.type}</h1>
             {renderTicTacToeGameData(gameData)}
             {renderPlayers(gameData)}
             <section className={sharedStyles["controls-container"]}><button onClick={refreshFn}>Refresh</button></section>
         </section>
-        <section className={sharedStyles["layout__column"]}>
+        <section className={sharedStyles["layout__column"] + " " + sharedStyles["layout__column--skinny"]}>
             {renderMoves(movesInfo.moves)}
         </section>
     </section>)
