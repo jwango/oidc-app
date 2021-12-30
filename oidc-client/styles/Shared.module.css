@@ -25,6 +25,10 @@
     width: 140px;
 }
 
+.controls-container > input[type=checkbox] {
+  align-self: center;
+}
+
 .controls-container > select {
     width: 140px;
 }

@@ -12,4 +12,4 @@ export function getTileSrc(tile, basePath = TILE_IMAGE_PATH) {
   return `${basePath}/${getTileFileName(tile)}`;
 }
 
-export const TILE_IMAGE_PATH = "assets/mahjong/tiles";
+export const TILE_IMAGE_PATH = "/assets/mahjong/tiles";

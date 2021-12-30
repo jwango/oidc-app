@@ -1,9 +1,11 @@
 import styles from '../styles/Shared.module.css'  
 import fetch from 'isomorphic-fetch'
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { AppConfigContext } from '../helpers/AppConfigProvider';
 import { handleFetchResponse } from '../utils';
 
-export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameId }) {
+export default function LobbyInterface({ errHandler }) {
 
   const GAME_STATES = {
     WAITING: 'WAITING',
@@ -25,6 +27,7 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
 
   const [state, setState] = useState(initialState);
   const [lastRes, setLastRes] = useState({});
+  const { gatewayUrl } = useContext(AppConfigContext);
 
   useEffect(() => {
     getGames();
@@ -34,8 +37,8 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
     fetch(`${gatewayUrl}/api/users/myself/games`, { credentials: 'include' })
     .then(handleFetchResponse)
     .then(body => {
-      setState({ ...state, games: body });
       setLastRes(body);
+      setState({ ...state, games: body });
     })
     .catch(err => handleErr(err));
   }
@@ -80,6 +83,17 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
     setLastRes(err);
   }
 
+  function getGameLink(game) {
+    let gameHref = null;
+    if (game.type === GAME_TYPES.MAHJONG) {
+      gameHref = `/mahjong/${game.id}`;
+    } else if (game.type === GAME_TYPES.TIC_TAC_TOE) {
+      gameHref = `/tictactoe/${game.id}`;
+    }
+
+    return gameHref && <Link href={gameHref}><button>Enter</button></Link>;
+  }
+
   function renderGamesTable(games) {
     const gameRows = (games || [])
         .filter((game) => !!state.activeOnly ? game.state !== GAME_STATES.OVER : true)
@@ -91,7 +105,7 @@ export default function LobbyInterface({ gatewayUrl, errHandler, setCurrentGameI
                   action = <td><button onClick={() => startGame(game.id)}>Start</button></td>
                 }
             } else  {
-                action = <td><button onClick={() => setCurrentGameId(game.id)}>Enter</button></td>
+                action = <td>{getGameLink(game)}</td>
             }
             return <tr key={game.id}>
                 {action}

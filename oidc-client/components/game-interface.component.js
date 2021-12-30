@@ -1,13 +1,14 @@
 import styles from '../styles/Shared.module.css'  
 import fetch from 'isomorphic-fetch'
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { usePubNub } from 'pubnub-react';
+import { AppConfigContext } from '../helpers/AppConfigProvider';
 import Mahjong from '../features/mahjong/mahjong.component';
 import GeneralGame from './general-game.component';
 import TicTacToe from './tictactoe.component';
 import { handleFetchResponse } from '../utils'
 
-export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }) {
+export default function GameInterface({ errHandler, gameId, backFn }) {
 
   const adminSecret = "secret"
 
@@ -21,6 +22,7 @@ export default function GameInterface({ gatewayUrl, errHandler, gameId, backFn }
   };
 
   const mPubNub = usePubNub();
+  const { gatewayUrl } = useContext(AppConfigContext);
 
   const [loaded, setLoaded] = useState(false);
   const [channels, setChannels] = useState(new Set());

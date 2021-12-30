@@ -156,7 +156,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
         const currentPlayer = gameData?.data?.currentPlayerId
         const direction = directionOf(currentPlayer, gameData)
         if (direction == null) { return null }
-        const imagePath = `assets/mahjong/COMPASS_${direction}.png`
+        const imagePath = `/assets/mahjong/COMPASS_${direction}.png`
         return <img src={imagePath} alt={direction + "highlighted"} width="100"></img>
     }
 

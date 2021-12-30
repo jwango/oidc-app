@@ -69,8 +69,8 @@ export default function Login({ gatewayUrl, logoutFn, setUserInfo }) {
             .then(handleFetchResponse)
             .then(body => {
                 setLoginState(LOGIN_STATES.ACCOUNT_FOUND);
-                setUserInfo(body);
                 setLastRes(body);
+                setUserInfo(body);
             })
             .catch(err => { setLastRes(err); throw err });
     }
