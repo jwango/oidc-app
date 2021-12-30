@@ -66,7 +66,7 @@ export default function Home({ gatewayUrl }) {
     const content = (userInfo && pubNub) ? (
       !!currentGameId
       ? <PubNubProvider client={pubNub}><GameInterface gatewayUrl={gatewayUrl} errHandler={errHandler} gameId={currentGameId} backFn={() => setCurrentGameId(null)}></GameInterface></PubNubProvider>
-      : <LobbyInterface gatewayUrl={gatewayUrl} setCurrentGameId={setCurrentGameId} logoutFn={logout}></LobbyInterface>
+      : <LobbyInterface gatewayUrl={gatewayUrl} errHandler={errHandler} setCurrentGameId={setCurrentGameId} logoutFn={logout}></LobbyInterface>
     ) : (
       <Login gatewayUrl={gatewayUrl} errHandler={errHandler} logoutFn={logout} setUserInfo={setUserInfo}></Login>
     )

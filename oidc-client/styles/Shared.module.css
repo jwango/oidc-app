@@ -9,6 +9,7 @@
     margin-bottom: 4px;
     margin-top: 2px;
     flex-wrap: wrap;
+    align-items: baseline;
 }
 
 .controls-container > * {
@@ -21,11 +22,11 @@
 }
 
 .controls-container > input[type=text] {
-    width: 120px;
+    width: 140px;
 }
 
 .controls-container > select {
-    width: 120px;
+    width: 140px;
 }
 
 .controls-container > label {

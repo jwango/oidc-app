@@ -148,6 +148,8 @@
             text-decoration: none;
             display: inline-block;
             font-size: 1.25rem;
+            min-height: inherit;
+            min-width: inherit;
         }
 
         a + a, button + button, a + button {
@@ -173,6 +175,7 @@
     p {
         margin-bottom: 1rem;
         word-wrap: break-word;
+        font-size: 1.1rem;
     }
 
     .main__footer-icon {
@@ -228,9 +231,16 @@
     button {
         border-width: 0;
         border-style: none;
-        padding: 0.25rem 0.5rem;
+        padding: 0.5rem 0.75rem;
         background-color: $background-faded;
         color: #333333;
+        font-size: 1.1rem;
+        min-width: 48px;
+        min-height: 48px;
+    }
+
+    input, select {
+      min-height: 48px;
     }
 
     button:hover, button:focus {
@@ -362,6 +372,16 @@
             width: $break-md;
             padding-left: 32px;
             padding-right: 32px;
+        }
+
+        button {
+          font-size: 1rem;
+          min-height: 16px;
+          padding: 0.25rem 0.5rem;
+        }
+
+        input, select {
+          min-height: 16px;
         }
     }
 
