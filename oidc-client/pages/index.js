@@ -1,9 +1,11 @@
 import { Fragment, useContext } from 'react';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { AppConfigContext } from '../helpers/AppConfigProvider';
 import LobbyInterface from '../components/lobby-interface.component';
 import Login from '../components/login.component';
+import withLayout from '../components/with-layout';
 
-export default function Home({ logout, userInfo, setUserInfo }) {
+function Home({ logout, userInfo, setUserInfo }) {
 
   const { gatewayUrl } = useContext(AppConfigContext);
 
@@ -24,3 +26,13 @@ export default function Home({ logout, userInfo, setUserInfo }) {
     <main className='content-wrapper'>{renderContent()}</main>
   )
 }
+
+export async function getServerSideProps({ locale }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common', 'lobby']))
+    }
+  };
+}
+
+export default withLayout(Home);

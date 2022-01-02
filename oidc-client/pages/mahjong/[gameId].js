@@ -1,7 +1,9 @@
 import { usePubNub } from "pubnub-react";
 import { useRouter } from "next/router";
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import useGameInterface from "../../helpers/useGameInterface";
 import Mahjong from "../../features/mahjong/mahjong.component";
+import withLayout from "../../components/with-layout";
 
 function MahjongPage() {
   const router = useRouter();
@@ -20,4 +22,12 @@ function MahjongPage() {
   </main>;
 }
 
-export default MahjongPage;
+export async function getServerSideProps({ locale }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common']))
+    }
+  };
+}
+
+export default withLayout(MahjongPage);

@@ -1,0 +1,16 @@
+{
+  "action": "Action",
+  "active": "Active",
+  "enter": "Enter",
+  "games": "Games",
+  "host": "Host",
+  "join": "Join",
+  "name": "Name",
+  "newGame": "New Game",
+  "noGames": "No games to show",
+  "pin": "PIN",
+  "register": "Register",
+  "start": "Start",
+  "state": "State",
+  "type": "Type"
+}

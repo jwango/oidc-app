@@ -2,6 +2,7 @@ import styles from '../styles/Shared.module.css'
 import fetch from 'isomorphic-fetch'
 import { useContext, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import { AppConfigContext } from '../helpers/AppConfigProvider';
 import { handleFetchResponse } from '../utils';
 
@@ -25,6 +26,8 @@ export default function LobbyInterface({ errHandler }) {
     activeOnly: true
   };
 
+  const { t } = useTranslation('lobby');
+  const tCommon = useTranslation('common').t;
   const [state, setState] = useState(initialState);
   const [lastRes, setLastRes] = useState({});
   const { gatewayUrl } = useContext(AppConfigContext);
@@ -91,7 +94,7 @@ export default function LobbyInterface({ errHandler }) {
       gameHref = `/tictactoe/${game.id}`;
     }
 
-    return gameHref && <Link href={gameHref}><button>Enter</button></Link>;
+    return gameHref && <Link href={gameHref}><button>{t('enter')}</button></Link>;
   }
 
   function renderGamesTable(games) {
@@ -102,7 +105,7 @@ export default function LobbyInterface({ errHandler }) {
             let action = <td></td>;
             if (game.state === GAME_STATES.WAITING) {
                 if (game.canStart) {
-                  action = <td><button onClick={() => startGame(game.id)}>Start</button></td>
+                  action = <td><button onClick={() => startGame(game.id)}>{t('start')}</button></td>
                 }
             } else  {
                 action = <td>{getGameLink(game)}</td>
@@ -110,22 +113,22 @@ export default function LobbyInterface({ errHandler }) {
             return <tr key={game.id}>
                 {action}
                 <td>{game.name || ""}</td>
-                <td>{game.type}</td>
-                <td>{game.state}</td>
+                <td>{tCommon(`gameTypes.${game.type}`)}</td>
+                <td>{tCommon(`gameStates.${game.state}`)}</td>
                 <td>{game.playerIds?.length}</td>
                 <td>{game.pin || ""}</td>
             </tr>
         })
-    if (!gameRows?.length) { return <p>No games to show</p>; }
+    if (!gameRows?.length) { return <p>{t('noGames')}</p>; }
     return <table>
         <thead>
             <tr>  
-                <th>Action</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>State</th>
+                <th>{t('action')}</th>
+                <th>{t('name')}</th>
+                <th>{t('type')}</th>
+                <th>{t('state')}</th>
                 <th></th>
-                <th>PIN</th>
+                <th>{t('pin')}</th>
             </tr>
         </thead>
         <tbody>
@@ -136,7 +139,7 @@ export default function LobbyInterface({ errHandler }) {
 
   function renderGameTypesSelect() {
       const options = Object.keys(GAME_TYPES).map(gameType => <option key={gameType} value={GAME_TYPES[gameType]}>
-          {GAME_TYPES[gameType]}
+          {tCommon(`gameTypes.${GAME_TYPES[gameType]}`)}
       </option>)
       return  <select id="gameTypes" name="gameTypes" onChange={(event) => handleGameInput({ gameType: event.target.value })}>{options}</select>
   }
@@ -146,28 +149,28 @@ export default function LobbyInterface({ errHandler }) {
         <h1>Lobby</h1>
         <section className={styles["layout__container"]}>
           <section className={styles["layout__column"] + " " + styles["layout__column--wide"]}>
-            <h2>Games</h2>
+            <h2>{t('games')}</h2>
             <section className={styles["controls-container"]}>
               <input type="checkbox" id="activeGame" name="activeOnly" checked={state.activeOnly} onChange={() => setState({ ...state, activeOnly: !state.activeOnly })}></input>
-              <label htmlFor="activeOnly">Active</label>
-              <button onClick={getGames}>Refresh</button>
+              <label htmlFor="activeOnly">{t('active')}</label>
+              <button onClick={getGames}>{t('refresh')}</button>
             </section>
             <section className={styles["state-container"] + " " + styles["content__wide"]}>
               {renderGamesTable(state.games)}
             </section>
           </section>
           <section className={styles["layout__column"] + " " + styles["layout__column--skinny"]}>
-            <h2>Host</h2>
+            <h2>{t('host')}</h2>
               <section className={styles["controls-container"]}>
-                <label htmlFor="gameTypes">Type</label>
+                <label htmlFor="gameTypes">{t('type')}</label>
                 {renderGameTypesSelect()}
-                <button onClick={() => createGame(state.createGameType)}>New Game</button>
+                <button onClick={() => createGame(state.createGameType)}>{t('newGame')}</button>
               </section>
-            <h2>Join</h2>
+            <h2>{t('join')}</h2>
             <section className={styles["controls-container"]}>
-              <label htmlFor="pinInput">PIN</label>
+              <label htmlFor="pinInput">{t('pin')}</label>
               <input name="pinInput" type="text" value={state.gamePinInput} onChange={(event) => handleGameInput({ pin: event.target.value }) }></input>
-              <button onClick={() => registerFor(state.gamePinInput)}>Register</button>
+              <button onClick={() => registerFor(state.gamePinInput)}>{t('register')}</button>
             </section>
           </section>
         </section>

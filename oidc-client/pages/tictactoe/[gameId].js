@@ -1,6 +1,8 @@
 import { usePubNub } from "pubnub-react";
 import { useRouter } from "next/router";
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import useGameInterface from "../../helpers/useGameInterface";
+import withLayout from "../../components/with-layout";
 import TicTacToe from "../../components/tictactoe.component";
 
 function TicTacToePage() {
@@ -18,6 +20,14 @@ function TicTacToePage() {
           refreshFn={() => refresh(gameId)}></TicTacToe>
       : <p>Loading your game...</p>}
     </main>
-  }
+}
 
-export default TicTacToePage;
+export async function getServerSideProps({ locale }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common']))
+    }
+  };
+}
+
+export default withLayout(TicTacToePage);

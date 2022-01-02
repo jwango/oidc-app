@@ -10,6 +10,7 @@
   "dependencies": {
     "isomorphic-fetch": "^3.0.0",
     "next": "10.0.7",
+    "next-i18next": "^10.1.0",
     "pubnub": "^4.29.11",
     "pubnub-react": "^2.1.0",
     "react": "17.0.1",

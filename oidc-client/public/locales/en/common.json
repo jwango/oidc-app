@@ -1,0 +1,19 @@
+{
+  "disclaimer": "Hello! As a disclaimer, this site makes use of 3rd party cookies to maintain your session cookies. If you use a browser that blocks such cookies, you won't be able to use this site until you disable that setting or until the session resolver is on the same domain.",
+  "gameStates": {
+    "OVER": "Over",
+    "RUNNING": "Running",
+    "WAITING": "Waiting"
+  },
+  "gameTypes": {
+    "TIC_TAC_TOE": "Tic-Tac-Toe",
+    "MAHJONG": "Mahjong"
+  },
+  "nav": {
+    "blog": "Blog",
+    "lobby": "Lobby",
+    "logout": "Logout"
+  },
+  "redirectingToLogin": "Redirecting you to login...",
+  "refresh": "Refresh"
+}
