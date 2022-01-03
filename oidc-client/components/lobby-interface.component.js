@@ -146,14 +146,14 @@ export default function LobbyInterface({ errHandler }) {
 
   return (
     <section>
-        <h1>Lobby</h1>
+        <h1>{tCommon('nav.lobby')}</h1>
         <section className={styles["layout__container"]}>
           <section className={styles["layout__column"] + " " + styles["layout__column--wide"]}>
             <h2>{t('games')}</h2>
             <section className={styles["controls-container"]}>
               <input type="checkbox" id="activeGame" name="activeOnly" checked={state.activeOnly} onChange={() => setState({ ...state, activeOnly: !state.activeOnly })}></input>
               <label htmlFor="activeOnly">{t('active')}</label>
-              <button onClick={getGames}>{t('refresh')}</button>
+              <button onClick={getGames}>{tCommon('refresh')}</button>
             </section>
             <section className={styles["state-container"] + " " + styles["content__wide"]}>
               {renderGamesTable(state.games)}

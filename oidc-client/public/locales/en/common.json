@@ -9,11 +9,14 @@
     "TIC_TAC_TOE": "Tic-Tac-Toe",
     "MAHJONG": "Mahjong"
   },
+  "loadingYourGame": "Loading your game...",
+  "makeThisMove": "Make this move",
   "nav": {
     "blog": "Blog",
     "lobby": "Lobby",
     "logout": "Logout"
   },
   "redirectingToLogin": "Redirecting you to login...",
-  "refresh": "Refresh"
+  "refresh": "Refresh",
+  "winnerIs": "Winner is"
 }
