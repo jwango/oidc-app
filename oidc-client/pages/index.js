@@ -34,7 +34,7 @@ function Home({ logout, userInfo, setUserInfo }) {
 export async function getServerSideProps({ locale }) {
   return {
     props: {
-      ...(await serverSideTranslations(locale, ['common', 'lobby']))
+      ...(await serverSideTranslations(locale, ['common', 'lobby', 'login']))
     }
   };
 }

@@ -18,7 +18,6 @@
     "WITH": "with {{grouping}}"
   },
   "myself": "Myself",
-  "play": "Play",
   "prompts": {
     "noMoves": "Currently no moves for you to make",
     "pendingMove": "System is still processing your last move request: {{moveType}} {{tile}}",

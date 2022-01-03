@@ -1,9 +1,11 @@
 import sharedStyles from '../styles/Shared.module.css'
 import { Fragment, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { handleFetchResponse, getQueryParams, setQueryParams } from '../utils';
 
 export default function Login({ gatewayUrl, logoutFn, setUserInfo }) {
-
+    const { t } = useTranslation('login');
+  
     const LOGIN_STATES = {
         LOGGED_OUT: 'LOGGED_OUT',
         ACCOUNT_NOT_FOUND: 'ACCOUNT_NOT_FOUND',
@@ -86,25 +88,25 @@ export default function Login({ gatewayUrl, logoutFn, setUserInfo }) {
     }
 
     let buttons = null;
-    let text = "Shall we play a game?";
+    let text = t('letsPlay');
     if (loginState === LOGIN_STATES.LOGGED_OUT) {
-        buttons = <button onClick={handleSigninButton}>Sign-in (Google)</button>;
+        buttons = <button onClick={handleSigninButton}>{t('signIn')}</button>;
     } else if (loginState === LOGIN_STATES.ACCOUNT_NOT_FOUND) {
         buttons = (<Fragment>
-            <button onClick={createUser}>Create Account</button>
-            <button onClick={logoutFn}>Nevermind</button>
+            <button onClick={createUser}>{t('createAccount')}</button>
+            <button onClick={logoutFn}>{t('nevermind')}</button>
         </Fragment>);
-        text = "Looks like you're new. Would you like to create an account?"
+        text = t('newPrompt');
     } else if (loginState === LOGIN_STATES.ACCOUNT_FOUND) {
-        buttons = <button onClick={logoutFn}>Logout</button>
+        buttons = <button onClick={logoutFn}>{t('logout')}</button>
     }
     if (loading) { 
-        text = "Loading...";
+        text = t('loading');
         buttons = null;
     };
       
     return (<section>
-        <h1>Login</h1>
+        <h1>{t('login')}</h1>
         <p>{text}</p>
         <section className={sharedStyles["controls-container"]}>
             {buttons}

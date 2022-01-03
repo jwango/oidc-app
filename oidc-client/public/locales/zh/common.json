@@ -1,7 +1,23 @@
 {
+  "disclaimer": "Hello! As a disclaimer, this site makes use of 3rd party cookies to maintain your session cookies. If you use a browser that blocks such cookies, you won't be able to use this site until you disable that setting or until the session resolver is on the same domain.",
+  "gameStates": {
+    "OVER": "完了",
+    "RUNNING": "进行中",
+    "WAITING": "在等"
+  },
+  "gameTypes": {
+    "TIC_TAC_TOE": "Tic-Tac-Toe",
+    "MAHJONG": "麻雀"
+  },
+  "loadingYourGame": "在准备你的游戏",
+  "makeThisMove": "Make this move",
+  "moves": "Moves",
   "nav": {
-    "blog": "ZH Blog",
-    "lobby": "ZH Lobby",
-    "logout": "ZH Logout"
-  }
+    "blog": "Blog",
+    "lobby": "游戏大厅",
+    "logout": "登出"
+  },
+  "redirectingToLogin": "帶你回前面登入...",
+  "refresh": "Refresh",
+  "winnerIs": "Winner is"
 }
