@@ -1,4 +1,5 @@
 import { Fragment, useEffect, createRef, useState } from "react"
+import { useTranslation } from "react-i18next";
 
 import styles from './Mahjong.module.css';
 import MahjongRules from "./mahjong-rules.component";
@@ -8,6 +9,10 @@ import sharedStyles from '../../styles/Shared.module.css';
 
 
 export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }) {
+
+    const { t } = useTranslation('mahjong');
+    const tCommon = useTranslation('common').t;
+
     const playerId = gameData?.playerData?.id
     const directions = ["N", "E", "S", "W"]
 
@@ -54,7 +59,8 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
         const actions = moves
             .filter(move => move.gameType == "MAHJONG" && move.moveInfo.moveType != "PLAY")
             .map(move => {
-                const moveText = (move.moveInfo.moveType == "EAT") ? `EAT with ${move.moveInfo.groupWith}` : move.moveInfo.moveType;
+                const tGrouping = move.moveInfo.groupWith.map(tile => `[${t(`tiles.${tile}`)}]`);
+                const moveText = (move.moveInfo.moveType == "EAT") ? `${t('moveTypes.EAT')} ${t('moveTypes.WITH', { grouping: tGrouping })}` : t(`moveTypes.${move.moveInfo.moveType}`);
                 return <button
                     className={styles["moves__action"]}
                     key={moveText}
@@ -73,23 +79,23 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
                     submitMoveFn(selectedMove)
                 }}
             >
-                Play {selectedHandTile.tile}
+                {t('moveTypes.PLAY')} [{t(`tiles.${selectedHandTile.tile}`)}]
             </button>)
         } else if (playMoves.length > 0) {
             if (selectedHandTile != null) {
-                setSelectedHandTile(null)
+                setSelectedHandTile(null);
             }
-            actions.push(<p key="prompt">You may select a tile to play</p>)
+            actions.push(<p key="prompt">{t('prompts.selectTile')}</p>)
         }
         if (moves.length === 0) {
-            actions.push(<p key="nomoves">Currently no moves for you to make</p>)
+            actions.push(<p key="nomoves">{t('prompts.noMoves')}</p>)
         }
         if (pendingMove != null) {
-            actions.push(<p key="pendingMove">System is still processing your last move request: {movesInfo.pendingMove.moveInfo.moveType} {movesInfo.pendingMove.moveInfo.tile}</p>)
+            actions.push(<p key="pendingMove">{t('prompts.pendingMove', { moveType: movesInfo.pendingMove.moveInfo.moveType, tile: movesInof.pendingMove.moveInfo.tile })}</p>)
         }
-        const content = gameIsOver ? <p key="gameOver">Game is over</p> : actions
+        const content = gameIsOver ? <p key="gameOver">{t('gameOver')}</p> : actions
         return (<section>
-            <h3>Moves</h3>
+            <h3>{tCommon('moves')}</h3>
             {renderCompass(gameData)}
             <span className={styles["moves__actions-container"]}>{content}</span>
         </section>)
@@ -117,7 +123,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
     function renderPlayerOptions(gameData) {
         const otherPlayersData = (gameData?.data?.otherPlayersData || []).map((p, i) => ({ direction: directionOf(p.id, gameData), id: p.id, name: p.name || `Other ${i + 1}` }))
         const myId = gameData?.playerData?.id 
-        const data = [ { direction: directionOf(myId, gameData), id: myId, name: "Myself" }, ...otherPlayersData ].filter((id) => !!id)
+        const data = [ { direction: directionOf(myId, gameData), id: myId, name: t('myself') }, ...otherPlayersData ].filter((id) => !!id)
         const options = data.map(data => {
             return <option key={data.id} value={data.id}>({data.direction}) {data.name}</option>
         })
@@ -138,8 +144,9 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
         }, { [myId]: "You" })
 
         const moves = (gameData?.data?.moves || []).map((move, i) => {
-            const withText = !!(move.groupWith?.length) ? `with ${move.groupWith}` : "";
-            return <li key={`lastMove${i}`}><strong>({directionOf(move.playerId, gameData)}) {nameMap[move.playerId] || "???"}:</strong> {move.moveType} {move.tile || ""} {withText}</li>
+            const tGrouping = move.groupWith.map(tile => `[${t(`tiles.${tile}`)}]`);
+            const withText = !!(move.groupWith?.length) ? t('moveTypes.WITH', { grouping: tGrouping }) : "";
+            return <li key={`lastMove${i}`}><strong>({directionOf(move.playerId, gameData)}) {nameMap[move.playerId] || "???"}:</strong> {t(`moveTypes.${move.moveType}`)} {move.tile ? `[${t(`tiles.${move.tile}`)}]` : ""} {withText}</li>
         })
         return <ul className={styles["moves__container"]} ref={moveContainerRef}>{moves}</ul>
     }
@@ -186,27 +193,27 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
 
     function renderGame() {
       return (<article>
-        <h1>Mahjong</h1>
+        <h1>{t('mahjong')}</h1>
         <section className={sharedStyles["controls-container"]}>
-          <button type="button" onClick={() => setRulesVisible(true)}>Show Rules</button>
-          <button onClick={refreshFn}>Refresh</button>
+          <button type="button" onClick={() => setRulesVisible(true)}>{t('showRules')}</button>
+          <button onClick={refreshFn}>{tCommon('refresh')}</button>
         </section>
         <div className={sharedStyles["layout__container"]}>
           <section className={sharedStyles["layout__column"] + " " + sharedStyles["layout__column--wide"]}>
             <section>
-              <h3>Tiles Out ({ gameData?.data?.deckSize} left)</h3>
+              <h3>{t('tilesOut', { count: gameData?.data?.deckSize })}</h3>
               { renderGrouping(tilesOut, "tilesOut") }
             </section>
             <section>
               <h3>
-                <label>Look at </label>
+                <label>{t('lookAt')} </label>
                 {renderPlayerOptions(gameData)}
               </h3>
               {playerRendering}
             </section>
           </section>
           <section className={sharedStyles["layout__column"] + " " + sharedStyles["layout__column--skinny"]}>
-            <h3>Move History</h3>
+            <h3>{t('moveHistory')}</h3>
             {renderLastMoves(gameData)}
           </section>
         </div>          
