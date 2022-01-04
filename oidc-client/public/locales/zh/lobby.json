@@ -1,1 +1,16 @@
-{}
+{
+  "action": "行动",
+  "active": "进行中",
+  "enter": "进入",
+  "games": "队",
+  "host": "主办",
+  "join": "加入",
+  "name": "名称",
+  "newGame": "主办",
+  "noGames": "没有队能加入",
+  "pin": "PIN",
+  "register": "注册",
+  "start": "开始",
+  "state": "状况",
+  "type": "类型"
+}

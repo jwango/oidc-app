@@ -1,15 +1,19 @@
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 export default function withLayout(InnerComponent) {
   return (props) => {
     const { logout, userInfo } = props;
     const { t } = useTranslation('common');
+    const { locale } = useRouter();
+    const nextLocale = locale === 'en' ? 'zh' : 'en';
 
     function renderPageActions() {
       return (userInfo) ? (<>
-        <Link href='/'><a>{t('nav.lobby')}</a></Link>
         <button onClick={logout}>{t('nav.logout')}</button>
+        <Link href='/'><a>{t('nav.lobby')}</a></Link>
+        <Link href='/' locale={nextLocale}><a>{t('switchLocale')}</a></Link>
       </>) : null;
     }
 
