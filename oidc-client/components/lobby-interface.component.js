@@ -15,8 +15,8 @@ export default function LobbyInterface({ errHandler }) {
   };
 
   const GAME_TYPES = {
-      TIC_TAC_TOE: 'TIC_TAC_TOE',
-      MAHJONG: 'MAHJONG'
+    MAHJONG: 'MAHJONG',
+    TIC_TAC_TOE: 'TIC_TAC_TOE'
   };
 
   const initialState = {

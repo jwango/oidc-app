@@ -13,7 +13,6 @@ export default function withLayout(InnerComponent) {
       return (userInfo) ? (<>
         <button onClick={logout}>{t('nav.logout')}</button>
         <Link href='/'><a>{t('nav.lobby')}</a></Link>
-        <Link href='/' locale={nextLocale}><a>{t('switchLocale')}</a></Link>
       </>) : null;
     }
 
@@ -27,6 +26,7 @@ export default function withLayout(InnerComponent) {
         <nav>
           <div className='content-wrapper'>
             <Link href='https://www.jwango.com'><a>{t('nav.blog')}</a></Link>
+            <Link href='/' locale={nextLocale}><a>{t('switchLocale')}</a></Link>
             {renderPageActions()}
           </div>
         </nav>
