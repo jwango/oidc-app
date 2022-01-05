@@ -22,7 +22,7 @@ export default function LobbyInterface({ errHandler }) {
   const initialState = {
     games: [],
     gamePinInput: '',
-    createGameType: GAME_TYPES.TIC_TAC_TOE,
+    createGameType: GAME_TYPES.MAHJONG,
     activeOnly: true
   };
 
