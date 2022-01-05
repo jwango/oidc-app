@@ -11,8 +11,8 @@
     "PASS": "Pass",
     "PLAY": "Play",
     "PONG": "Pong",
-    "SELF_GONG": "Self Gong",
-    "SILENT_GONG": "Silent Gong",
+    "GONG_SELF": "Self Gong",
+    "GONG_SILENT": "Silent Gong",
     "WIN": "Win",
     "WIN_SELF": "Solo Win",
     "WITH": "with {{grouping}}"

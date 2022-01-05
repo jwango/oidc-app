@@ -11,10 +11,10 @@
     "PASS": "不吃",
     "PLAY": "打",
     "PONG": "碰",
-    "SELF_GONG": "自己槓",
-    "SILENT_GONG": "暗槓",
+    "GONG_SELF": "自己槓",
+    "GONG_SILENT": "暗槓",
     "WIN": "胡",
-    "WIN_SELF": "自摩",
+    "WIN_SELF": "自摩胡",
     "WITH": "跟 {{grouping}}"
   },
   "myself": "自己",
