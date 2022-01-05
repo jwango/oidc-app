@@ -84,6 +84,11 @@
         padding-right: $content-padding;
         margin-left: auto;
         margin-right: auto;
+
+        &.no-wrap {
+          white-space: nowrap;
+          overflow: auto;
+        }
     }
 
     .container {

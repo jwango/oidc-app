@@ -24,8 +24,7 @@ export default function withLayout(InnerComponent) {
           </div>
         </header>
         <nav>
-          <div className='content-wrapper'>
-            <Link href='https://www.jwango.com'><a>{t('nav.blog')}</a></Link>
+          <div className='content-wrapper no-wrap'>
             <Link href='/' locale={nextLocale}><a>{t('switchLocale')}</a></Link>
             {renderPageActions()}
           </div>
