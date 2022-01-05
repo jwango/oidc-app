@@ -106,7 +106,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
         const isMyself = playerData?.id === myselfId
         if (!isMyself) {
             for (let i = 0; i < playerData?.silentGongCount || 0; i += 1) {
-                silentGroupingsData.push([null, null, null, null])
+                silentGroupingsData.push({ tiles: [null, null, null, null], isVisible: false, pong: false });
             }
         }
         const playersGroupingsData = playerData?.groupings || []
