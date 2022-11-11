@@ -123,7 +123,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
         </h1>
 
         <div className={sharedStyles["layout__container"]}>
-          <section className={sharedStyles["layout__column"]}>
+          <section className={sharedStyles["layout__column"]} style={{ width: "100%" }}>
             <h3>{t('tilesOut', { count: gameData?.data?.deckSize })}</h3>
             <div className={styles["tiles-out"]} ref={tilesOutContainerRef}>
               <MahjongGrouping tiles={tilesOut} />
@@ -154,7 +154,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
 
 function MahjongPlayerSection({ className, playerData, gameData, selectedHandTile, setSelectedHandTile }) {
   const { t } = useTranslation('mahjong');
-  
+
   if (playerData == null) { return null; }
 
   const silentGroupingsData = []
