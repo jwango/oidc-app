@@ -18,8 +18,10 @@ export default function MahjongRules({ backFn }) {
   const WINNING_HAND_GROUPINGS = [["NUMBER_1", "NUMBER_1"], ["NUMBER_1", "NUMBER_2", "NUMBER_3"], ["STICK_1", "STICK_1", "STICK_1"]];
 
   return <article className={styles["rules"]}>
-    <h1>{t('rules.mahjongRules')}</h1>
-    <button type="button" onClick={() => backFn()}>{t('rules.backToGame')}</button>
+    <h1 className={sharedStyles["layout__container"]} style={{ justifyContent: "space-between" }}>
+      {t('rules.mahjongRules')}
+      <span className={sharedStyles["controls-container"]}><button type="button" onClick={() => backFn()}>{t('rules.backToGame')}</button></span>
+    </h1>
     <div className={sharedStyles["layout__container"]}>
       <div className={sharedStyles["layout__column"]}>
         <section>

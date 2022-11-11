@@ -1,3 +1,8 @@
+.tiles-out {
+  overflow-y: auto;
+  max-height: 150px;
+}
+
 .player__hand {
     margin: 0px;
     padding-left: 15px;
@@ -47,7 +52,7 @@ ul > li.player__tile {
 }
 
 .moves__container {
-    overflow-y: scroll;
+    overflow-y: auto;
     max-height: 200px;
     width: 100%;
     border-style: solid;

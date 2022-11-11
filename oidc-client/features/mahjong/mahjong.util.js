@@ -1,10 +1,10 @@
 export function getTileFileName(tile) {
   if (!tile) {
-      return "HIDDEN.png"
+      return "HIDDEN.jpg"
   } else if (tile.startsWith("FLOWER")) {
-      return "FLOWER.png"
+      return "FLOWER.jpg"
   } else {
-      return tile + ".png"
+      return tile + ".jpg"
   }
 }
 
