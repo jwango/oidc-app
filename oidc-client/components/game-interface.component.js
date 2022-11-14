@@ -8,6 +8,10 @@ import GeneralGame from './general-game.component';
 import TicTacToe from './tictactoe.component';
 import { handleFetchResponse } from '../utils'
 
+export const MESSAGE_TYPES = {
+  MOVE_MADE: 'MOVE_MADE'
+};
+
 export default function GameInterface({ errHandler, gameId, backFn }) {
 
   const adminSecret = "secret"
@@ -15,10 +19,6 @@ export default function GameInterface({ errHandler, gameId, backFn }) {
   const GAME_TYPES = {
       TIC_TAC_TOE: 'TIC_TAC_TOE',
       MAHJONG: 'MAHJONG'
-  };
-
-  const MESSAGE_TYPES = {
-    MOVE_MADE: 'MOVE_MADE'
   };
 
   const mPubNub = usePubNub();

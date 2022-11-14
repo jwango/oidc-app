@@ -1,38 +1,35 @@
 import { useContext, useEffect, useState } from "react";
 import { AppConfigContext } from "./AppConfigProvider";
 import { handleFetchResponse } from '../utils';
+import { MESSAGE_TYPES } from "../components/game-interface.component";
 
 export default function useGameInterface(mPubNub, gameId) {
 
   const { gatewayUrl } = useContext(AppConfigContext);
   const [loaded, setLoaded] = useState(false);
-  const [channels, setChannels] = useState(new Set());
   const [messages, setMessages] = useState([]);
   const [currentGame, setCurrentGame] = useState({});
   const [currentMoves, setCurrentMoves] = useState({ pendingMove: null, moves: [] });
   const [lastRes, setLastRes] = useState({});
 
   useEffect(() => {
-    const newChannels = Array.from(channels.values());
-    if (newChannels.length > 0) {
-      mPubNub.addListener({ message: handleMessage });
-      mPubNub.subscribe({ channels: newChannels });
-    }
+    getGameData(gameId);
+    getMoves(gameId);
+  }, [gameId]);
+
+  useEffect(() => {
+    mPubNub.unsubscribeAll();
+    mPubNub.subscribe({ channels: [gameId] });
+    mPubNub.addListener({ message: handleMessage });
 
     return function cleanup() {
       mPubNub.unsubscribeAll();
     }
-  }, [mPubNub, channels]);
-
-  useEffect(() => { 
-    getGameData(gameId);
-    getMoves(gameId);
-    setChannels((new Set(channels)).add(gameId));
-  }, [gameId])
+  }, [mPubNub, gameId])
 
   function handleMessage(event) {
     const message = event.message;
-    setMessages([...messages, event]);
+    setMessages((oldMessages) => [...oldMessages, event]);
     if (message.type == MESSAGE_TYPES.MOVE_MADE) {
       getGameData(gameId);
       getMoves(gameId);
@@ -80,5 +77,5 @@ export default function useGameInterface(mPubNub, gameId) {
     setLastRes(err);
   }
 
-  return { loaded, gameData: currentGame, movesInfo: currentMoves, makeMove, refresh };
+  return { loaded, gameData: currentGame, movesInfo: currentMoves, messages, makeMove, refresh };
 }
