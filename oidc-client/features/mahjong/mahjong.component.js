@@ -29,7 +29,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
         return `${t('moveTypes.GONG_SILENT')} [${t(`tiles.${moveInfo.tile}`)}]`;
       }
 
-      return t(`moveTypes.${move.moveInfo.moveType}`);
+      return t(`moveTypes.${moveInfo.moveType}`);
     }
 
     function renderMoves(movesInfo, gameData) {
