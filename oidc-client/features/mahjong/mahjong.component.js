@@ -61,7 +61,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
             actions.push(<p key="nomoves">{t('prompts.noMoves')}</p>)
         }
         if (pendingMove != null) {
-            actions.push(<p key="pendingMove">{t('prompts.pendingMove', { moveType: movesInfo.pendingMove.moveInfo.moveType, tile: movesInof.pendingMove.moveInfo.tile })}</p>)
+            actions.push(<p key="pendingMove">{t('prompts.pendingMove', { moveType: movesInfo.pendingMove.moveInfo.moveType, tile: movesInfo.pendingMove.moveInfo.tile })}</p>)
         }
         const content = gameIsOver ? <p key="gameOver">{t('gameOver')}</p> : actions
         return (<>
