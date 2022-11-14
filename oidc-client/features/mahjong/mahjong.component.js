@@ -21,6 +21,17 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
     const moveContainerRef = createRef();
     const tilesOutContainerRef = createRef();
 
+    function getMoveText(moveInfo) {
+      if (moveInfo.moveType == "EAT") {
+        const tGrouping = moveInfo.groupWith.map(tile => `[${t(`tiles.${tile}`)}]`);
+        return `${t('moveTypes.EAT')} ${t('moveTypes.WITH', { grouping: tGrouping })}`;
+      } else if (moveInfo.moveType == "GONG_SILENT") {
+        return `${t('moveTypes.GONG_SILENT')} [${t(`tiles.${moveInfo.tile}`)}]`;
+      }
+
+      return t(`moveTypes.${move.moveInfo.moveType}`);
+    }
+
     function renderMoves(movesInfo, gameData) {
         const gameIsOver = !!(gameData?.data?.winner) || !(gameData?.data?.playersToMove?.length);
         const pendingMove = movesInfo?.pendingMove?.moveInfo;
@@ -29,8 +40,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
         const actions = moves
             .filter(move => move.gameType == "MAHJONG" && move.moveInfo.moveType != "PLAY")
             .map(move => {
-                const tGrouping = move.moveInfo.groupWith.map(tile => `[${t(`tiles.${tile}`)}]`);
-                const moveText = (move.moveInfo.moveType == "EAT") ? `${t('moveTypes.EAT')} ${t('moveTypes.WITH', { grouping: tGrouping })}` : t(`moveTypes.${move.moveInfo.moveType}`);
+                const moveText = getMoveText(move.moveInfo);
                 return <button
                     className={styles["moves__action"]}
                     key={moveText}
