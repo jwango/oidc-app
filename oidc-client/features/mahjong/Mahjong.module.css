@@ -66,11 +66,11 @@ ul.moves__container > li {
 }
 
 .moves__entry--whoa::marker {
-  content: '\01F4E2';
+  content: '\01F6D1';
 }
 
 .moves__entry--mine::marker {
-  content: '\01F92b';
+  content: '\01F449';
 }
 
 .moves__actions-container {
