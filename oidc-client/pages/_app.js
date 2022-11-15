@@ -46,10 +46,23 @@ function MyApp({ Component, pageProps, appConfig }) {
     setUserInfo
   };
 
+  const themeColor = '#666699';
+
   const baseContent = (<>
     <Head>
+      <meta name='viewport' content='initial-scale=1.0, width=device-width' />
+      <meta name='theme-color' content={themeColor} />
+      <link rel='manifest' href='/manifest.json' />
       <title>jwango games</title>
-      <link rel="icon" href="/favicon.ico" />
+
+      <meta name='mobile-web-app-capable' content='yes'></meta>
+      <link rel='icon' type='image/png' href='/favicon.ico' sizes='16x16' />
+      <link rel='icon' type='image/png' href='/favicon.ico' sizes='24x24' />
+      <link rel='icon' type='image/png' href='/favicon.ico' sizes='32x32' />
+      <link rel='icon' type='image/png' href='/favicon.ico' sizes='64x64' />
+      <link rel='apple-touch-icon' href='/app-icon.png' />
+      <link rel='mask-icon' href='/mask-icon.svg' color={themeColor}/>
+      <link rel='shortcut icon' href='/app-icon.png' />
     </Head>
     <AppConfigContext.Provider value={appConfig}>
       <Component {...allProps} />
