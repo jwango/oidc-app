@@ -1,0 +1,36 @@
+{
+  "short_name": "JW Games",
+  "name": "jwango games",
+  "description": "responsive web games",
+  "icons": [
+    {
+      "src": "app-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+	{
+      "src": "app-icon-any.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "app-icon-512-any.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+	 }
+  ],
+  "start_url": "/",
+  "background_color": "#666699",
+  "display": "minimal-ui",
+  "scope": "/",
+  "theme_color": "#666699"
+}
