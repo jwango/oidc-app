@@ -153,15 +153,15 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
             {renderLastMoves(gameData)}
             
           </section>
-          <section className={sharedStyles["layout__column"]}>
-          <MahjongPlayerSection
-            playerData={gameData?.playerData}
-            gameData={gameData}
-            selectedHandTile={selectedHandTile}
-            setSelectedHandTile={setSelectedHandTile}
-          />
-          {renderMoves(movesInfo, gameData)}
-          </section>
+          <div className={sharedStyles["layout__column"]}>
+            <MahjongPlayerSection
+              playerData={gameData?.playerData}
+              gameData={gameData}
+              selectedHandTile={selectedHandTile}
+              setSelectedHandTile={setSelectedHandTile}
+            />
+            {renderMoves(movesInfo, gameData)}
+          </div>
          
           <MahjongPlayerSection gameData={gameData} playerData={otherPlayersData[0]} className={sharedStyles["layout__column"]} />
           <MahjongPlayerSection gameData={gameData} playerData={otherPlayersData[1]} className={sharedStyles["layout__column"]} />
