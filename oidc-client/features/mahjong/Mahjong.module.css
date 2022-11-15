@@ -61,8 +61,16 @@ ul > li.player__tile {
     min-width: 300px;
 }
 
-.moves__container > li {
-    list-style: none;
+ul.moves__container > li {
+  margin-left: 20px;
+}
+
+.moves__entry--whoa::marker {
+  content: '\01F4E2';
+}
+
+.moves__entry--mine::marker {
+  content: '\01F92b';
 }
 
 .moves__actions-container {

@@ -21,7 +21,7 @@
   "prompts": {
     "noMoves": "Currently no moves for you to make",
     "pendingMove": "System is still processing your last move request: {{moveType}} {{tile}}",
-    "selectTile": "You may select a tile to play"
+    "selectTile": "Select a tile to play"
   },
   "rules": {
     "additionallyHonorTiles": "Additionally there exists Honor Tiles",

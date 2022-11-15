@@ -90,7 +90,10 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
         const moves = (gameData?.data?.moves || []).map((move, i) => {
             const tGrouping = move.groupWith?.map(tile => `[${t(`tiles.${tile}`)}]`);
             const withText = !!(move.groupWith?.length) ? t('moveTypes.WITH', { grouping: tGrouping }) : "";
-            return <li key={`lastMove${i}`}><strong>({directionOf(move.playerId, gameData)}) {nameMap[move.playerId] || "???"}:</strong> {t(`moveTypes.${move.moveType}`)} {move.tile ? `[${t(`tiles.${move.tile}`)}]` : ""} {withText}</li>
+            const className = move.playerId === myId
+              ? styles['moves__entry--mine']
+              : (move.moveType === "PONG" || move.moveType === "GONG" ? styles['moves__entry--whoa'] : '');
+            return <li className={className} key={`lastMove${i}`}><strong>({directionOf(move.playerId, gameData)}) {nameMap[move.playerId] || "???"}:</strong> {t(`moveTypes.${move.moveType}`)} {move.tile ? `[${t(`tiles.${move.tile}`)}]` : ""} {withText}</li>
         })
         return <ul className={styles["moves__container"]} ref={moveContainerRef}>{moves}</ul>
     }
@@ -115,10 +118,18 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
             }
         }
         if (!!moveContainerRef.current) {
-            moveContainerRef.current.scrollTop = moveContainerRef.current.scrollHeight;
+          moveContainerRef.current.scrollTo({
+            left: moveContainerRef.current.scrollLeft,
+            top: moveContainerRef.current.scrollHeight,
+            behavior: "smooth"
+          });
         }
         if (!!tilesOutContainerRef.current) {
-          tilesOutContainerRef.current.scrollTop = tilesOutContainerRef.current.scrollHeight;
+          tilesOutContainerRef.current.scrollTo({
+            left: tilesOutContainerRef.current.scrollLeft,
+            top: tilesOutContainerRef.current.scrollHeight,
+            behavior: "smooth"
+          });
         }
     }, [movesInfo, gameData])
 
