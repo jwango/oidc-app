@@ -171,7 +171,7 @@ function MahjongPlayerSection({ className, playerData, gameData, selectedHandTil
   const isMyself = !!setSelectedHandTile;
   if (!isMyself) {
       for (let i = 0; i < playerData?.silentGongCount || 0; i += 1) {
-          silentGroupingsData.push([null, null, null, null])
+          silentGroupingsData.push({ tiles: [null, null, null, null] });
       }
   }
   const playersGroupingsData = playerData?.groupings || []
