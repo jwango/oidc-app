@@ -75,7 +75,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
         }
         const content = gameIsOver ? <p key="gameOver">{t('gameOver')}</p> : actions
         return (<>
-            <h3>{tCommon('moves')}</h3>
+            <h2>{tCommon('moves')}</h2>
             {renderCompass(gameData)}
             <span className={styles["moves__actions-container"]}>{content}</span>
         </>)
@@ -103,7 +103,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
         const direction = directionOf(currentPlayer, gameData)
         if (direction == null) { return null }
         const imagePath = `/assets/mahjong/COMPASS_${direction}.png`
-        return <img src={imagePath} alt={direction + "highlighted"} width="100"></img>
+        return <img src={imagePath} alt={direction + " highlighted"} width="100" height="100"></img>
     }
 
     const tilesOut = gameData?.data?.tilesOut || [];
@@ -145,11 +145,11 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
 
         <div className={sharedStyles["layout__container"]}>
           <section className={sharedStyles["layout__column"]} style={{ width: "100%" }}>
-            <h3>{t('tilesOut', { count: gameData?.data?.deckSize })}</h3>
+            <h2>{t('tilesOut', { count: gameData?.data?.deckSize })}</h2>
             <div className={styles["tiles-out"]} ref={tilesOutContainerRef}>
               <MahjongGrouping tiles={tilesOut} />
             </div>  
-            <h3 style={{marginTop: 0}}>{t('moveHistory')}</h3>
+            <h2 style={{marginTop: 0}}>{t('moveHistory')}</h2>
             {renderLastMoves(gameData)}
             
           </section>
@@ -198,7 +198,7 @@ function MahjongPlayerSection({ className, playerData, gameData, selectedHandTil
   const direction = directionOf(playerData.id, gameData);
 
   return <section className={className || ''}>
-    <h3>{(direction && `(${direction}) ` || '') + (isMyself ? t('myself') : playerData.name)}</h3>
+    <h2>{(direction && `(${direction}) ` || '') + (isMyself ? t('myself') : playerData.name)}</h2>
     { handRendering }
     <br></br>
     { groupings }

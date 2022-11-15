@@ -10,7 +10,7 @@ export const GROUPING_TYPES = {
 export default function MahjongGrouping({ tiles, groupingType = GROUPING_TYPES.GROUPING }) {
   const tileElements = tiles.map((tile, index) => {
     return <li key={tile + index} className={styles["player__tile"]}>
-        <img src={getTileSrc(tile)} alt={tile}></img>
+        <img src={getTileSrc(tile)} alt={tile || "HIDDEN"}></img>
     </li>
   });
   return <ul className={styles[groupingType]}>{ tileElements }</ul>
