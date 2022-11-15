@@ -73,6 +73,14 @@ ul.moves__container > li {
   content: '\01F449';
 }
 
+.moves__entry--win::marker {
+  content: '\01F3C5'
+}
+
+.moves__entry--win-wow::marker {
+  content: '\01F3C6';
+}
+
 .moves__actions-container {
     display: inline-block;
     vertical-align: top;

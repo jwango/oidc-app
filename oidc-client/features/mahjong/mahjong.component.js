@@ -81,6 +81,19 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
         </>)
     }
 
+    function getMoveEntryClassname(move, myId) {
+      if (move.moveType === "WIN_SELF") {
+        return styles['moves__entry--win-wow'];
+      } else if (move.moveType === "WIN") {
+        return styles['moves__entry--win'];
+      } else if (move.playerId === myId) {
+        return styles['moves__entry--mine'];
+      } else if (move.moveType === "PONG" || move.moveType === "GONG") {
+        return styles['moves__entry--whoa'];
+      }
+      return '';
+    }
+
     function renderLastMoves(gameData) {
         const myId = gameData?.playerData?.id 
         const nameMap = (gameData?.data?.otherPlayersData || []).reduce((acc, curr, i) => {
@@ -90,9 +103,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
         const moves = (gameData?.data?.moves || []).map((move, i) => {
             const tGrouping = move.groupWith?.map(tile => `[${t(`tiles.${tile}`)}]`);
             const withText = !!(move.groupWith?.length) ? t('moveTypes.WITH', { grouping: tGrouping }) : "";
-            const className = move.playerId === myId
-              ? styles['moves__entry--mine']
-              : (move.moveType === "PONG" || move.moveType === "GONG" ? styles['moves__entry--whoa'] : '');
+            const className = getMoveEntryClassname(move, myId);
             return <li className={className} key={`lastMove${i}`}><strong>({directionOf(move.playerId, gameData)}) {nameMap[move.playerId] || "???"}:</strong> {t(`moveTypes.${move.moveType}`)} {move.tile ? `[${t(`tiles.${move.tile}`)}]` : ""} {withText}</li>
         })
         return <ul className={styles["moves__container"]} ref={moveContainerRef}>{moves}</ul>
@@ -103,7 +114,7 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
         const direction = directionOf(currentPlayer, gameData)
         if (direction == null) { return null }
         const imagePath = `/assets/mahjong/COMPASS_${direction}.png`
-        return <img src={imagePath} alt={direction + " highlighted"} width="100" height="100"></img>
+        return <img src={imagePath} alt={`Compass pointing ${direction}`} width="100" height="100"></img>
     }
 
     const tilesOut = gameData?.data?.tilesOut || [];
