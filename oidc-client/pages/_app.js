@@ -37,6 +37,7 @@ function MyApp({ Component, pageProps, appConfig }) {
         setUserInfo(null);
         window.location.replace(setQueryParams("/", queryParams));
       })
+      .catch(console.log);
   }
 
   const allProps = {

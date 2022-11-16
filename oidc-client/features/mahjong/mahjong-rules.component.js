@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "next-i18next";
 import MahjongGrouping, { GROUPING_TYPES } from "./mahjong-grouping.component";
 
 import styles from './Mahjong.module.css';

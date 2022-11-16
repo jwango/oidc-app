@@ -3,7 +3,7 @@ import styles from './lobby.module.css';
 import fetch from 'isomorphic-fetch'
 import { useContext, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { AppConfigContext } from '../helpers/AppConfigProvider';
 import { handleFetchResponse } from '../utils';
 

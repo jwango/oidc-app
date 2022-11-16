@@ -1,6 +1,6 @@
 import sharedStyles from '../styles/Shared.module.css'
 import { Fragment, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { handleFetchResponse, getQueryParams, setQueryParams } from '../utils';
 
 export default function Login({ gatewayUrl, logoutFn, setUserInfo }) {
