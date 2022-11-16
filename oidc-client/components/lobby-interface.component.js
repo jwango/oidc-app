@@ -1,4 +1,5 @@
-import styles from '../styles/Shared.module.css'  
+import sharedStyles from '../styles/Shared.module.css'  
+import styles from './lobby.module.css';
 import fetch from 'isomorphic-fetch'
 import { useContext, useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -112,22 +113,22 @@ export default function LobbyInterface({ errHandler }) {
             }
             return <tr key={game.id}>
                 {action}
+                <td>{game.playerIds?.length}</td>
+                <td>{tCommon(`gameStates.${game.state}`)}</td>
                 <td>{game.name || ""}</td>
                 <td>{tCommon(`gameTypes.${game.type}`)}</td>
-                <td>{tCommon(`gameStates.${game.state}`)}</td>
-                <td>{game.playerIds?.length}</td>
                 <td>{game.pin || ""}</td>
             </tr>
         })
     if (!gameRows?.length) { return <p>{t('noGames')}</p>; }
-    return <table>
+    return <table className={styles["games-table"]}>
         <thead>
             <tr>  
                 <th>{t('action')}</th>
+                <th></th>
+                <th>{t('state')}</th>
                 <th>{t('name')}</th>
                 <th>{t('type')}</th>
-                <th>{t('state')}</th>
-                <th></th>
                 <th>{t('pin')}</th>
             </tr>
         </thead>
@@ -147,33 +148,33 @@ export default function LobbyInterface({ errHandler }) {
   return (
     <section>
         <h1>{tCommon('nav.lobby')}</h1>
-        <section className={styles["layout__container"]}>
-          <section className={styles["layout__column"] + " " + styles["layout__column--wide"]}>
-            <h2>{t('games')}</h2>
-            <section className={styles["controls-container"]}>
-              <input type="checkbox" id="activeGame" name="activeOnly" checked={state.activeOnly} onChange={() => setState({ ...state, activeOnly: !state.activeOnly })}></input>
-              <label htmlFor="activeOnly">{t('active')}</label>
-              <button onClick={getGames}>{tCommon('refresh')}</button>
-            </section>
-            <section className={styles["state-container"] + " " + styles["content__wide"]}>
-              {renderGamesTable(state.games)}
-            </section>
-          </section>
-          <section className={styles["layout__column"] + " " + styles["layout__column--skinny"]}>
+        <div className={sharedStyles["layout__container"]}>
+          <div className={sharedStyles["layout__column"] + " " + sharedStyles["layout__column--skinny"]}>
             <h2>{t('host')}</h2>
-              <section className={styles["controls-container"]}>
-                <label htmlFor="gameTypes">{t('type')}</label>
-                {renderGameTypesSelect()}
-                <button onClick={() => createGame(state.createGameType)}>{t('newGame')}</button>
-              </section>
+            <section className={sharedStyles["controls-container"]}>
+              <label htmlFor="gameTypes">{t('type')}</label>
+              {renderGameTypesSelect()}
+              <button onClick={() => createGame(state.createGameType)}>{t('newGame')}</button>
+            </section>
             <h2>{t('join')}</h2>
-            <section className={styles["controls-container"]}>
+            <section className={sharedStyles["controls-container"]}>
               <label htmlFor="pinInput">{t('pin')}</label>
               <input name="pinInput" type="text" value={state.gamePinInput} onChange={(event) => handleGameInput({ pin: event.target.value }) }></input>
               <button onClick={() => registerFor(state.gamePinInput)}>{t('register')}</button>
             </section>
+          </div>
+          <section className={sharedStyles["layout__column"] + " " + sharedStyles["layout__column--wide"]}>
+            <h2>{t('games')}</h2>
+            <div className={sharedStyles["controls-container"]}>
+              <input type="checkbox" id="activeGame" name="activeOnly" checked={state.activeOnly} onChange={() => setState({ ...state, activeOnly: !state.activeOnly })}></input>
+              <label htmlFor="activeOnly">{t('active')}</label>
+              <button onClick={getGames}>{tCommon('refresh')}</button>
+            </div>
+            <div className={sharedStyles["state-container"] + " " + sharedStyles["content__wide"]}>
+              {renderGamesTable(state.games)}
+            </div>
           </section>
-        </section>
+        </div>
     </section>
   )
 }

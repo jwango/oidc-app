@@ -1,0 +1,23 @@
+table.games-table {
+    height: calc(100vh - 420px);
+    min-height: 500px;
+    overflow-y: auto;
+    position: relative;
+    display: inline-block;
+    padding: 0;
+    border-width: 0px;
+}
+
+.games-table > thead {
+    position: sticky;
+    top: 0;
+    border: 1px solid black;
+}
+
+.games-table tr:nth-of-type(even) {
+    background-color: #d7ebf2;
+}
+
+.games-table button {
+    border: 1px solid black;
+}
