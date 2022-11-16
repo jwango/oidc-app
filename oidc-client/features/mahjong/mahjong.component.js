@@ -100,13 +100,31 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
             return { ...acc, [curr.id]: curr.name || `Other ${i + 1}` }
         }, { [myId]: "You" })
 
-        const moves = (gameData?.data?.moves || []).map((move, i) => {
-            const tGrouping = move.groupWith?.map(tile => `[${t(`tiles.${tile}`)}]`);
-            const withText = !!(move.groupWith?.length) ? t('moveTypes.WITH', { grouping: tGrouping }) : "";
-            const className = getMoveEntryClassname(move, myId);
-            return <li className={className} key={`lastMove${i}`}><strong>({directionOf(move.playerId, gameData)}) {nameMap[move.playerId] || "???"}:</strong> {t(`moveTypes.${move.moveType}`)} {move.tile ? `[${t(`tiles.${move.tile}`)}]` : ""} {withText}</li>
+        const movesGroupedByPlayer = (gameData?.data?.moves || []).reduce((acc, curr) => {
+          // start a new grouping if no grouping exists or if a different player from the last grouping
+          if (acc.length === 0 || acc[acc.length - 1].playerId !== curr.playerId) {
+            return [...acc, { playerId: curr.playerId, moves: [curr] }];
+          }
+
+          // otherwise add the newest move to the grouping
+          const latestGrouping = acc[acc.length - 1];
+          latestGrouping.moves = [...latestGrouping.moves, curr];
+          return acc;
+        }, []);
+        const moves = (movesGroupedByPlayer).map((moveGroup, i) => {
+            const textArr = moveGroup.moves.map((move) => {
+              const tGrouping = move.groupWith?.map(tile => `[${t(`tiles.${tile}`)}]`);
+              const withText = !!(move.groupWith?.length) ? ` ${t('moveTypes.WITH', { grouping: tGrouping })}` : "";
+
+              return `${t(`moveTypes.${move.moveType}`)}${move.tile ? ` [${t(`tiles.${move.tile}`)}]` : ""}${withText}`;
+            });
+            
+            const className = moveGroup.moves.length > 0 ? getMoveEntryClassname(moveGroup.moves[0], myId) : '';
+            return <li className={className} key={`lastMove${i}`}><strong>({directionOf(moveGroup.playerId, gameData)}) {nameMap[moveGroup.playerId] || "???"}:</strong> {textArr.join(", ")}</li>
         })
-        return <ul className={styles["moves__container"]} ref={moveContainerRef}>{moves}</ul>
+        return <ul className={styles["moves__container"]} ref={moveContainerRef}>
+          {moves.length > 0 ? moves : <li>No moves made</li>}
+        </ul>
     }
 
     function renderCompass(gameData) {
@@ -122,27 +140,31 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
     const otherPlayersData = gameData?.data?.otherPlayersData || [];
 
     useEffect(() => {
-        if (playerId != null && lastMove != null && lastMove.playerId == playerId && selectedHandTile == null) {
-            if (lastMove.moveType == "DRAW" || lastMove.moveType == "DRAW_TAIL") {
-                const index = gameData.playerData.hand.findIndex(tile => tile == lastMove.tile)
-                setSelectedHandTile({ tile: lastMove.tile, index })
-            }
+      if (!!moveContainerRef.current) {
+        moveContainerRef.current.scrollTo({
+          left: moveContainerRef.current.scrollLeft,
+          top: moveContainerRef.current.scrollHeight,
+          behavior: "smooth"
+        });
+      }
+    }, [movesInfo])
+
+    useEffect(() => {
+      if (playerId != null && lastMove != null && lastMove.playerId == playerId && selectedHandTile == null) {
+        if (lastMove.moveType == "DRAW" || lastMove.moveType == "DRAW_TAIL") {
+            const index = gameData.playerData.hand.findIndex(tile => tile == lastMove.tile)
+            setSelectedHandTile({ tile: lastMove.tile, index })
         }
-        if (!!moveContainerRef.current) {
-          moveContainerRef.current.scrollTo({
-            left: moveContainerRef.current.scrollLeft,
-            top: moveContainerRef.current.scrollHeight,
-            behavior: "smooth"
-          });
-        }
-        if (!!tilesOutContainerRef.current) {
-          tilesOutContainerRef.current.scrollTo({
-            left: tilesOutContainerRef.current.scrollLeft,
-            top: tilesOutContainerRef.current.scrollHeight,
-            behavior: "smooth"
-          });
-        }
-    }, [movesInfo, gameData])
+      }
+
+      if (!!tilesOutContainerRef.current) {
+        tilesOutContainerRef.current.scrollTo({
+          left: tilesOutContainerRef.current.scrollLeft,
+          top: tilesOutContainerRef.current.scrollHeight,
+          behavior: "smooth"
+        });
+      }
+    }, [gameData]);
 
     function renderGame() {
       return (<article>
@@ -158,9 +180,9 @@ export default function Mahjong({ gameData, movesInfo, submitMoveFn, refreshFn }
           <section className={sharedStyles["layout__column"]} style={{ width: "100%" }}>
             <h2>{t('tilesOut', { count: gameData?.data?.deckSize })}</h2>
             <div className={styles["tiles-out"]} ref={tilesOutContainerRef}>
-              <MahjongGrouping tiles={tilesOut} />
+              { tilesOut.length > 0 ? <MahjongGrouping tiles={tilesOut} /> : "No tiles played" }
             </div>  
-            <h2 style={{marginTop: 0}}>{t('moveHistory')}</h2>
+            <h2>{t('moveHistory')}</h2>
             {renderLastMoves(gameData)}
             
           </section>
@@ -210,10 +232,11 @@ function MahjongPlayerSection({ className, playerData, gameData, selectedHandTil
 
   return <section className={className || ''}>
     <h2>{(direction && `(${direction}) ` || '') + (isMyself ? t('myself') : playerData.name)}</h2>
-    { handRendering }
-    <br></br>
-    { groupings }
-    <MahjongGrouping tiles={playerData?.flowers || []} groupingType={GROUPING_TYPES.GROUPING} />
+    <div className={styles["player__section"]}>
+      { handRendering }
+      { groupings }
+      <MahjongGrouping tiles={playerData?.flowers || []} groupingType={GROUPING_TYPES.GROUPING} />
+    </div>
   </section>
 }
 

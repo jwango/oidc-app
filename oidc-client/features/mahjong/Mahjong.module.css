@@ -1,6 +1,6 @@
 .tiles-out {
   overflow-y: auto;
-  max-height: 150px;
+  height: 80px;
 }
 
 .player__hand {
@@ -18,6 +18,7 @@ ul > li.player__tile {
 .player__tile > img {
   width: 40px;
   height: 60px;
+  vertical-align: middle;
 }
 
 .grouping, .grouping__figure {
@@ -53,7 +54,7 @@ ul > li.player__tile {
 
 .moves__container {
     overflow-y: auto;
-    max-height: 200px;
+    height: 120px;
     width: 100%;
     border-style: solid;
     border-color: darkgrey;
@@ -95,6 +96,22 @@ button.moves__action {
 
 .rules {
   width: 100%;
+}
+
+@media only screen and (min-width: 768px) {
+  /* align the heights of the player section and tiles out in 2-column layout */
+  .player__section {
+    min-height: 196px;
+  }
+
+  .tiles-out {
+    height: 196px;
+  }
+
+  /* show more moves on wider layout because we have the real estate to do so */
+  .moves__container {
+    height: 150px;
+  }
 }
 
 @media only screen and (min-width: 1012px) {

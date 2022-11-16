@@ -32,7 +32,7 @@ export default function withLayout(InnerComponent) {
         <InnerComponent {...props} />
         <hr className="content-wrapper"></hr>
         <footer className='main__footer content-wrapper'>
-          <p>&copy; 2022</p>
+          <p>{t('disclaimer')} &copy; 2021</p>
         </footer>
       </div>
     </span>
