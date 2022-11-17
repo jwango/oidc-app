@@ -1,0 +1,33 @@
+.container {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 8px;
+    border-radius: 4px;
+    min-width: 300px;
+    max-width: 600px;
+    min-height: 48px;
+    padding: 12px;
+    background-color: #666699;
+    color: white;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    transition: opacity 500ms;
+    z-index: 1000;
+}
+
+.container button {
+    min-width: 32px;
+    min-height: 32px;
+}
+
+.snackbar--hidden {
+    opacity: 0;
+}
+
+.snackbar--visible {
+    opacity: 1;
+}

@@ -6,10 +6,12 @@ import getConfig from 'next/config';
 import { useRouter } from "next/router";
 import PubNub from 'pubnub';
 import { PubNubProvider } from 'pubnub-react';
+import Snackbar from '../components/snackbar.component';
 import useStickyState from '../helpers/useStickyState';
 import { AppConfigContext } from '../helpers/AppConfigProvider';
 import '../styles/sass/main.scss';
 import { handleFetchResponse, setQueryParams } from '../utils';
+import { SnackbarContextProvider } from '../helpers/SnackbarContext';
 
 function MyApp({ Component, pageProps, appConfig }) {
   const [pubNub, setPubNub] = useState(null);
@@ -66,7 +68,9 @@ function MyApp({ Component, pageProps, appConfig }) {
       <link rel='shortcut icon' href='/app-icon.png' />
     </Head>
     <AppConfigContext.Provider value={appConfig}>
-      <Component {...allProps} />
+      <SnackbarContextProvider>
+        <Component {...allProps} />
+      </SnackbarContextProvider>
     </AppConfigContext.Provider>
   </>)
 

@@ -2,9 +2,11 @@ import { useContext, useEffect, useState } from "react";
 import { AppConfigContext } from "./AppConfigProvider";
 import { handleFetchResponse } from '../utils';
 import { MESSAGE_TYPES } from "../components/game-interface.component";
+import { useSnackbar } from '../helpers/SnackbarContext';
 
 export default function useGameInterface(mPubNub, gameId) {
 
+  const [showSnackbar, dismissSnackbar] = useSnackbar();
   const { gatewayUrl } = useContext(AppConfigContext);
   const [loaded, setLoaded] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -74,6 +76,14 @@ export default function useGameInterface(mPubNub, gameId) {
   }
 
   function handleErr(err) {
+    let errorMsg = 'The server cannot process that request.'
+    if (err.status != 404 && err.status >= 400 && err.status < 500) {
+      errorMsg = 'That action is unsupported.';
+    } else if (err.status >= 500) {
+      errorMsg = 'The server failed to process that request.';
+    }
+    showSnackbar(errorMsg);
+    dismissSnackbar(5000);
     setLastRes(err);
   }
 
